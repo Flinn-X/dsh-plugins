@@ -1,0 +1,60 @@
+{
+  "name": "dsh-fold-user-messages",
+  "version": "1.2.0",
+  "description": "Folds long user messages in DSH Chat into a 220px preview, with a Show more / Show less toggle. Short messages stay untouched.",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "Flinn",
+    "url": "https://github.com/Flinn-X"
+  },
+  "homepage": "https://github.com/Flinn-X/dsh-plugins/tree/main/packages/fold-user-messages#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Flinn-X/dsh-plugins.git",
+    "directory": "packages/fold-user-messages"
+  },
+  "bugs": {
+    "url": "https://github.com/Flinn-X/dsh-plugins/issues"
+  },
+  "keywords": [
+    "deepseek",
+    "harness",
+    "dsh",
+    "dsh-plugin",
+    "chat",
+    "collapse",
+    "user-message"
+  ],
+  "engines": {
+    "dsh": ">=0.2.2-rc.1 <0.3.0-0"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-chat"
+      ]
+    }
+  }
+}

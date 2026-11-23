@@ -1,0 +1,31 @@
+{
+  "name": "dsh-plugins",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Two DeepSeek Harness (DSH) web client plugins: dsh-palettes and dsh-fold-user-messages.",
+  "license": "MIT",
+  "author": {
+    "name": "Flinn",
+    "url": "https://github.com/Flinn-X"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Flinn-X/dsh-plugins.git"
+  },
+  "homepage": "https://github.com/Flinn-X/dsh-plugins#readme",
+  "bugs": {
+    "url": "https://github.com/Flinn-X/dsh-plugins/issues"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "python packages/palettes/build_client.py",
+    "test": "node packages/palettes/test_client.cjs",
+    "check": "node scripts/check-packages.mjs",
+    "verify": "npm run build && npm run test && npm run check",
+    "pack:palettes": "npm pack --workspace dsh-palettes",
+    "pack:fold": "npm pack --workspace dsh-fold-user-messages"
+  }
+}

@@ -1,0 +1,6 @@
+url: https://github.com/Flinn-X/dsh-plugins/tree/main/packages/palettes
+name: Flinn-X/dsh-plugins#palettes
+category: theme
+description:
+  en: Five palettes for the DSH web client, each with a light and a dark version, switchable in Settings → General.
+  zh: 为 DSH Web 客户端提供五套配色（纸白、雾蓝、苔绿、藕荷、青瓷），每套都有浅色与深色两版，在设置 → 通用里切换。

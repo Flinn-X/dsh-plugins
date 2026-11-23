@@ -1,0 +1,3 @@
+- insert:
+    - id: fold-user-messages
+      name: 'dsh-fold-user-messages'

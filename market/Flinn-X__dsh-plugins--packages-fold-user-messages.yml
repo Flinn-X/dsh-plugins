@@ -1,0 +1,6 @@
+url: https://github.com/Flinn-X/dsh-plugins/tree/main/packages/fold-user-messages
+name: Flinn-X/dsh-plugins#fold-user-messages
+category: ui
+description:
+  en: Folds user messages taller than 300px in DSH Chat into a 220px preview with a Show more / Show less toggle.
+  zh: 把 DSH 对话里渲染高度超过 300px 的用户消息折叠为 220px，并提供「展开全文 / 收起」按钮。

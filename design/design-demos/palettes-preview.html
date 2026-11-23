@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>DSH 浅色配色 · 五套方案预览</title>
+<style>
+  /* ---------- 页面骨架（中性，不与方案争夺注意力） ---------- */
+  :root{
+    --page-bg:#F1F1EF; --ink:#191A1C; --mute:#5F6165; --faint:#6A6C70;
+    --rule:rgba(25,26,28,.14); --rule-soft:rgba(25,26,28,.08);
+    --mono:ui-monospace,SFMono-Regular,"Cascadia Mono",Consolas,"Liberation Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--page-bg);color:var(--ink);font:13.5px/1.6 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  ::selection{background:rgba(25,26,28,.14)}
+  button{font:inherit;color:inherit}
+  .wrap{max-width:1360px;margin:0 auto;padding:38px 48px 96px}
+
+  /* ---------- 页头 ---------- */
+  .mast{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;border-bottom:1px solid var(--rule);padding-bottom:20px}
+  .mast h1{margin:0;font-size:25px;font-weight:600;letter-spacing:-.022em;line-height:1.25}
+  .mast .lede{margin:8px 0 0;max-width:720px;color:var(--mute);font-size:13px}
+  .mast .lede b{color:var(--ink);font-weight:500}
+  .meta{flex:0 0 auto;text-align:right;font:10.5px/1.7 var(--mono);color:var(--faint);letter-spacing:.02em}
+  .meta strong{display:block;color:var(--ink);font-weight:500;font-size:11px}
+
+  /* ---------- 主舞台：方案索引 + 窗口 ---------- */
+  .stage{margin-top:30px}
+  .tabbar{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;border-bottom:1px solid var(--rule);margin-bottom:18px}
+  .tabs{display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;min-width:0}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabtools{display:flex;align-items:center;gap:14px;padding-bottom:11px;flex:0 0 auto}
+  .tabhint{font:10px var(--mono);color:var(--faint)}
+  .modes{display:inline-flex;background:rgba(25,26,28,.07);border-radius:8px;padding:2px}
+  .modes button{border:0;background:none;color:var(--mute);font-size:11.5px;line-height:1;padding:5px 11px;border-radius:6px;cursor:pointer}
+  .modes button[aria-pressed="true"]{background:var(--ink);color:#F4F3F0}
+  .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .tab{position:relative;flex:0 0 auto;display:flex;align-items:center;gap:9px;padding:0 19px 13px;border:0;background:none;cursor:pointer;white-space:nowrap}
+  .tab:hover .nm{color:#000}
+  .tab .strip{display:flex;gap:2px}
+  .tab .strip i{width:9px;height:15px;border-radius:2px;display:block;background:var(--sw-base,#ccc);box-shadow:inset 0 0 0 1px rgba(25,26,28,.16)}
+  .tab .strip i:nth-child(2){background:var(--sw-side,#ddd)}
+  .tab .strip i:nth-child(3){background:var(--sw-bubble,#e5e5e5)}
+  .tab .strip i:nth-child(4){background:var(--sw-accent,#999)}
+  .tab .nm{font-size:13.5px;font-weight:500;letter-spacing:-.01em}
+  .tab .en{font:10.5px var(--mono);color:var(--faint)}
+  .tab[aria-pressed="true"] .nm{font-weight:600}
+  .tab[aria-pressed="true"]::after{content:"";position:absolute;left:19px;right:19px;bottom:-1px;height:2px;background:var(--ink)}
+
+
+  /* ---------- 应用窗口 ---------- */
+  .win{height:722px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid rgba(23,24,26,.12);
+       box-shadow:0 26px 64px -30px rgba(23,24,26,.5),0 2px 6px rgba(23,24,26,.05);
+       background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);
+       font-family:var(--sans);font-size:13px;line-height:1.5}
+  .win .tb{flex:0 0 34px;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--dsw-specific-sidebar-fill);border-bottom:1px solid var(--dsw-alias-border-l1)}
+  .win .tb .mark{width:18px;height:18px;border-radius:5px;background:var(--dsw-alias-label-primary);display:grid;place-items:center;gap:2px;padding:4px 3px}
+  .win .tb .mark i{display:block;height:1.5px;background:var(--dsw-alias-label-primary-foreground);border-radius:1px}
+  .win .tb .mark i:nth-child(1){width:9px}.win .tb .mark i:nth-child(2){width:6px}.win .tb .mark i:nth-child(3){width:9px}
+  .win .tb .t{font-size:11px;color:var(--dsw-alias-label-tertiary);margin:0 auto;letter-spacing:.01em}
+  .win .tb .wc{display:flex;gap:2px}
+  .win .tb .wc span{width:40px;height:26px;display:grid;place-items:center;border-radius:5px;color:var(--dsw-alias-label-tertiary)}
+  .win .tb .wc span:hover{background:var(--dsw-alias-interactive-bg-hover)}
+  .win .tb .wc svg{width:9px;height:9px}
+  .body{flex:1;display:flex;min-height:0}
+
+  /* 侧栏 */
+  .side{flex:0 0 268px;display:flex;flex-direction:column;background:var(--dsw-specific-sidebar-fill);border-right:1px solid var(--dsw-alias-border-l3);padding:6px 8px 8px}
+  .side .brand{display:flex;align-items:center;gap:8px;padding:8px 7px 12px}
+  .side .brand .sign{width:19px;height:19px;border-radius:5px;background:var(--dsw-alias-label-primary);display:grid;gap:2px;padding:5px 3px}
+  .side .brand .sign i{display:block;height:1.5px;background:var(--dsw-alias-label-primary-foreground);border-radius:1px}
+  .side .brand .sign i:nth-child(1){width:11px}.side .brand .sign i:nth-child(2){width:7px}.side .brand .sign i:nth-child(3){width:11px}
+  .side .brand b{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+  .side .brand .chev{margin-left:auto;color:var(--dsw-alias-label-caption)}
+  .side .sec{display:flex;align-items:center;justify-content:space-between;padding:8px 7px 4px;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--dsw-alias-label-tertiary)}
+  .side .sec .add{width:20px;height:20px;display:grid;place-items:center;border-radius:5px;color:var(--dsw-alias-label-tertiary)}
+  .side .grp{display:flex;align-items:center;gap:5px;padding:6px 7px 3px;font-size:10.5px;color:var(--dsw-alias-label-caption)}
+  .side .row{display:flex;align-items:center;gap:7px;height:30px;padding:0 8px;border-radius:7px;font-size:12.5px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden}
+  .side .row:hover{background:var(--dsw-alias-interactive-bg-hover)}
+  .side .row[aria-current]{background:var(--dsw-specific-sidebar-nav-item-active);color:var(--dsw-alias-label-primary);font-weight:500}
+  .side .row time{margin-left:auto;font-size:10px;color:var(--dsw-alias-label-caption);font-variant-numeric:tabular-nums}
+  .side .row .sl{display:block;overflow:hidden;text-overflow:ellipsis}
+  .side .foot{margin-top:auto;border-top:1px solid var(--dsw-alias-border-l1);padding-top:6px}
+  .side .foot .row{color:var(--dsw-alias-label-secondary);font-size:12px}
+
+  /* 主区 */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--dsw-alias-bg-base)}
+  .chead{flex:0 0 44px;display:flex;align-items:center;padding:0 24px}
+  .chead-in{width:100%;max-width:748px;margin:0 auto;display:flex;align-items:center;gap:8px}
+  .chead .title{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+  .chead .acts{margin-left:auto;display:flex;gap:1px;color:var(--dsw-alias-label-tertiary)}
+  .chead .acts span{width:26px;height:26px;border-radius:6px;display:grid;place-items:center}
+  .chead .acts span:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}
+  .chead svg{width:14px;height:14px}
+  .scroll{flex:1;min-height:0;overflow:hidden;padding:0 24px}
+  .thread{max-width:748px;margin:0 auto;padding:18px 0 0;display:flex;flex-direction:column;gap:26px}
+
+  .urow{display:flex;justify-content:flex-end}
+  .bubble{max-width:70.2%;padding:10px 16px;border-radius:18px;background:var(--dsw-specific-bubble);color:var(--dsw-alias-label-primary);font-size:13.5px;line-height:22px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .arow{display:flex;flex-direction:column;gap:9px}
+  .arow p{margin:0;font-size:13.5px;line-height:22px;color:var(--dsw-alias-label-primary)}
+  .arow p.dim{color:var(--dsw-alias-label-secondary)}
+  .arow .lnk{color:var(--dsw-alias-link);text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(20,22,25,.28)}
+
+  .tool{border:1px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-alias-bg-layer-1);overflow:hidden}
+  .tool .th{display:flex;align-items:center;gap:8px;height:34px;padding:0 11px;font-size:12px}
+  .tool .dot{width:6px;height:6px;border-radius:50%;background:var(--dsw-alias-state-success-primary);flex:0 0 auto}
+  .tool .tn{font-weight:500}
+  .tool .tm{color:var(--dsw-alias-label-tertiary);font-size:11.5px;font-variant-numeric:tabular-nums}
+  .tool .tc{margin-left:auto;color:var(--dsw-alias-label-caption);display:grid;place-items:center}
+  .tool svg{width:12px;height:12px}
+
+  .code{border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-markdown-code-block);overflow:hidden}
+  .code .ch{display:flex;align-items:center;height:30px;padding:0 11px;border-bottom:1px solid var(--dsw-alias-border-l1);font:10.5px var(--mono);color:var(--dsw-alias-label-tertiary)}
+  .code .ch .cp{margin-left:auto;display:flex;align-items:center;gap:4px;font:10.5px var(--mono)}
+  .code .ch svg{width:11px;height:11px}
+  .code pre{margin:0;padding:10px 13px;font:11.5px/19px var(--mono);color:var(--dsw-alias-label-primary);overflow:hidden}
+  .code .k{color:var(--dsw-alias-label-tertiary)}
+  .code .v{color:var(--dsw-alias-label-primary)}
+  .code .sel{color:var(--dsw-alias-state-business-primary)}
+
+  .composer{flex:0 0 auto;padding:10px 24px 18px}
+  .ccard{max-width:748px;margin:0 auto;background:var(--dsw-specific-input-major);border:1px solid var(--dsw-alias-border-l2);border-radius:20px;padding:12px 14px 10px;box-shadow:0 10px 30px -22px rgba(20,22,25,.45)}
+  .ccard .ph{font-size:13.5px;line-height:20px;color:var(--dsw-alias-markdown-placeholder);padding:1px 2px 15px}
+  .ccard .tools{display:flex;align-items:center;gap:4px}
+  .ccard .tools .chip{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--dsw-alias-label-secondary);padding:3px 7px;border-radius:6px}
+  .ccard .tools .chip:hover{background:var(--dsw-alias-interactive-bg-hover)}
+  .ccard .tools .ic{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;color:var(--dsw-alias-label-tertiary)}
+  .ccard .tools .ic:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}
+  .ccard svg{width:14px;height:14px}
+  .ccard .send{margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-label-primary-foreground);display:grid;place-items:center}
+  .ccard .send svg{width:13px;height:13px}
+
+  /* 窗口下方说明 */
+  .cap{display:flex;align-items:flex-start;justify-content:space-between;gap:36px;margin-top:22px}
+  .cap h2{margin:0;font-size:16px;font-weight:600;letter-spacing:-.015em}
+  .cap h2 .en{font:10.5px var(--mono);color:var(--faint);font-weight:400;letter-spacing:.02em;margin-left:7px}
+  .cap h2 .mode-tag{display:inline-flex;align-items:center;height:18px;margin-left:8px;padding:0 6px;border:1px solid var(--rule);border-radius:5px;font:10px var(--mono);font-weight:400;color:var(--mute);letter-spacing:.02em;vertical-align:2px}
+  .cap .idea{margin:6px 0 0;max-width:600px;color:var(--mute);font-size:12.5px;line-height:1.75}
+  .cap .vals{display:flex;gap:14px;flex:0 0 auto;padding-top:3px}
+  .cap .vals figure{margin:0;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+  .cap .vals i{display:block;width:44px;height:14px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.34)}
+  .cap .vals figcaption{font:10px var(--mono);color:var(--mute);letter-spacing:.01em}
+
+  /* ---------- 区块 ---------- */
+  .sec{margin-top:56px;border-top:1px solid var(--rule);padding-top:15px}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:18px}
+  .sec-head h2{margin:0;font-size:12.5px;font-weight:600;letter-spacing:.02em;color:#3B3D41}
+  .sec-head p{margin:0;font-size:11.5px;color:var(--faint)}
+  .sec-head code{font:10.5px var(--mono);color:var(--mute);background:rgba(25,26,28,.045);padding:1px 5px;border-radius:4px}
+
+  /* 设置面板 */
+  .setwin{display:flex;height:356px;border-radius:14px;overflow:hidden;border:1px solid rgba(23,24,26,.12);box-shadow:0 20px 48px -32px rgba(23,24,26,.45);
+          background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-family:var(--sans)}
+  .win[data-mode="dark"]{border-color:rgba(0,0,0,.5);box-shadow:0 30px 72px -34px rgba(0,0,0,.72),0 2px 8px rgba(0,0,0,.3)}
+  .setwin[data-mode="dark"]{border-color:rgba(0,0,0,.5);box-shadow:0 24px 56px -34px rgba(0,0,0,.68)}
+  .setnav{flex:0 0 188px;background:var(--dsw-specific-sidebar-fill);border-right:1px solid var(--dsw-alias-border-l2);padding:16px 9px}
+  .setnav .nt{font-size:13px;font-weight:600;padding:0 8px 12px;letter-spacing:-.01em}
+  .setnav a{display:flex;align-items:center;height:28px;padding:0 8px;border-radius:6px;font-size:12.5px;color:var(--dsw-alias-label-secondary);text-decoration:none}
+  .setnav a[aria-current]{background:var(--dsw-specific-sidebar-nav-item-active);color:var(--dsw-alias-label-primary);font-weight:500}
+  .setbody{flex:1;min-width:0;padding:20px 26px;overflow:hidden}
+  .setbody h3{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em}
+  .setrows{margin-top:6px}
+  .setrow{display:flex;align-items:center;gap:40px;padding:14px 0;border-top:1px solid var(--dsw-alias-border-l1)}
+  .setrow:first-child{border-top:0}
+  .setrow .lb{flex:1;min-width:0}
+  .setrow .lb b{display:block;font-size:12.5px;font-weight:500;line-height:1.5}
+  .setrow .lb span{display:block;margin-top:2px;font-size:11px;line-height:1.55;color:var(--dsw-alias-label-tertiary)}
+  .setrow .ctl{flex:0 0 auto;display:flex;align-items:center;gap:10px}
+  .seg{display:inline-flex;background:var(--dsw-specific-selector);border-radius:8px;padding:2px}
+  .seg span{font-size:11.5px;line-height:1;padding:5px 11px;border-radius:6px;color:var(--dsw-alias-label-secondary);white-space:nowrap}
+  .seg span[aria-pressed="true"]{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);box-shadow:0 1px 2px rgba(20,20,20,.1)}
+  .pal{display:flex;gap:8px}
+  .pal button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;border:0;background:none;cursor:pointer;border-radius:8px}
+  .pal .chip{position:relative;width:52px;height:30px;border-radius:6px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(20,20,20,.14);
+             background:linear-gradient(90deg,var(--sw-base,#ccc) 0 33.4%,var(--sw-side,#ddd) 33.4% 66.7%,var(--sw-bubble,#eee) 66.7% 100%)}
+  .pal .chip::after{content:"";position:absolute;inset:auto 0 0 0;height:3px;background:var(--sw-accent,#777)}
+  .pal button span{font-size:10px;line-height:1.2;color:var(--dsw-alias-label-tertiary);white-space:nowrap}
+  .pal button[aria-pressed="true"] .chip{box-shadow:inset 0 0 0 2px var(--dsw-alias-label-primary)}
+  .pal button[aria-pressed="true"] span{color:var(--dsw-alias-label-primary);font-weight:500}
+  .stepper{display:inline-flex;align-items:center;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;overflow:hidden}
+  .stepper b{font:11.5px var(--mono);font-weight:500;padding:0 11px;line-height:26px;font-variant-numeric:tabular-nums}
+  .stepper i{width:26px;line-height:26px;text-align:center;border-left:1px solid var(--dsw-alias-border-l1);color:var(--dsw-alias-label-secondary);font-style:normal}
+  .setnote{margin-top:14px;font-size:11px;color:var(--dsw-alias-label-caption);display:flex;align-items:center;gap:6px}
+  .setnote::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--dsw-alias-state-business-primary);flex:0 0 auto}
+
+  /* 并排对比 */
+  .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+  .mini{display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:none;cursor:pointer;text-align:left;border-radius:10px}
+  .mini .frame{height:142px;border-radius:9px;overflow:hidden;border:1px solid rgba(23,24,26,.14);background:var(--dsw-alias-bg-base);display:flex;box-shadow:0 1px 2px rgba(23,24,26,.04)}
+  .mini[aria-pressed="true"] .frame{box-shadow:0 0 0 2px var(--ink);border-color:transparent}
+  .mini .mside{flex:0 0 27%;background:var(--dsw-specific-sidebar-fill);border-right:1px solid var(--dsw-alias-border-l1);padding:9px 7px;display:flex;flex-direction:column;gap:5px}
+  .mini .mside i{display:block;height:3px;border-radius:2px;background:var(--dsw-alias-border-l4)}
+  .mini .mside i:nth-child(2){background:var(--dsw-specific-sidebar-nav-item-active);height:10px;border-radius:3px;margin-top:4px}
+  .mini .mmain{flex:1;min-width:0;padding:9px 8px;display:flex;flex-direction:column;gap:5px}
+  .mini .mb{height:19px;border-radius:6px;background:var(--dsw-specific-bubble);width:72%;margin-left:auto}
+  .mini .ml{height:3px;border-radius:2px;background:var(--dsw-alias-border-l4)}
+  .mini .mc{height:22px;border-radius:4px;background:var(--dsw-alias-markdown-code-block);margin-top:2px}
+  .mini .mcomp{margin-top:auto;height:16px;border-radius:8px;background:var(--dsw-specific-input-major);box-shadow:inset 0 0 0 1px var(--dsw-alias-border-l2)}
+  .mini .lbl{display:flex;align-items:baseline;gap:6px;padding:0 1px}
+  .mini .lbl b{font-size:12px;font-weight:500}
+  .mini .lbl span{font:10px var(--mono);color:var(--faint)}
+  .mini[aria-pressed="true"] .lbl b{font-weight:600}
+
+  /* 约束与数值 */
+  .spec{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:52px;align-items:start}
+  .spec h3{margin:0 0 12px;font-size:12px;font-weight:600;letter-spacing:.02em;color:#3B3D41}
+  .spec ul{margin:0;padding:0;list-style:none}
+  .spec li{position:relative;padding:9px 0 9px 16px;border-top:1px solid var(--rule-soft);font-size:12px;line-height:1.75;color:var(--mute)}
+  .spec li:first-child{border-top:0}
+  .spec li::before{content:"";position:absolute;left:0;top:17px;width:5px;height:1px;background:#9A9C9F}
+  .spec li b{color:var(--ink);font-weight:500}
+  .spec li code{font:10.5px var(--mono);color:var(--ink)}
+  .tbl{width:100%;border-collapse:collapse;font-size:12px}
+  .tbl th{text-align:left;font:10px var(--mono);font-weight:400;letter-spacing:.04em;color:var(--mute);padding:0 0 8px;border-bottom:1px solid var(--rule)}
+  .tbl th.r,.tbl td.r{text-align:right}
+  .tbl td{padding:7px 0;border-bottom:1px solid var(--rule-soft);vertical-align:baseline}
+  .tbl td:first-child{color:var(--mute);width:34%}
+  .tbl td:nth-child(2){font:10.5px var(--mono);color:var(--faint);width:46%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tbl td.r{font:10.5px var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+  .tbl .swv{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.34)}
+
+  .foot{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;gap:24px;font:10.5px/1.7 var(--mono);color:var(--mute)}
+
+  /* 预览用的基础常量（真实运行由 DSH 基础样式表提供） */
+  .live{--dsw-alias-label-primary-foreground:#fff;--dsw-alias-state-success-primary:#22c55e;--dsw-alias-state-warn-primary:#f59e0b;--dsw-alias-state-error-primary:#ec1313}
+  .live[data-mode="dark"]{--dsw-alias-label-primary-foreground:#0f1115}
+
+  /* 交互 */
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:2px}
+  .live,.live *{transition:background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease}
+  .mini .frame,.sw,.pal button{transition:box-shadow .18s ease,background-color .18s ease}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (max-width:1180px){
+    .wrap{padding:28px 26px 72px}
+    .mast .lede{max-width:720px}
+    .stage{grid-template-columns:1fr;gap:26px}
+    .picker{position:static}
+    .picker .swrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 18px}
+    .sw{border-bottom:1px solid var(--rule-soft)}
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .spec{grid-template-columns:1fr;gap:34px}
+    .win{height:660px}
+    .side{flex-basis:230px}
+    .setwin{height:auto;min-height:312px}
+  }
+[data-scheme="paper"]{
+  --dsw-alias-bg-base:#FCFAF6;
+  --dsw-alias-bg-layer-1:#FFFDF9;
+  --dsw-alias-bg-layer-2:#FFFDF9;
+  --dsw-alias-bg-layer-3:#FFFDF9;
+  --dsw-alias-bg-overlay:#EDE6D8;
+  --dsw-specific-input-major:#FFFDF9;
+  --dsw-specific-sidebar-fill:#F3EEE3;
+  --dsw-specific-sidebar-nav-item-active:#EDE6D8;
+  --dsw-specific-sidebar-nav-item-active-accent:#DFD5C0;
+  --dsw-specific-bubble:#F4EEE1;
+  --dsw-specific-bubble-highlight:#E9DFC9;
+  --dsw-specific-selector:#F1EBDF;
+  --dsw-specific-tip:#F6F1E7;
+  --dsw-alias-border-l1:rgba(60,48,20,.07);
+  --dsw-alias-border-l2:rgba(60,48,20,.12);
+  --dsw-alias-border-l3:rgba(60,48,20,.16);
+  --dsw-alias-border-l4:rgba(60,48,20,.22);
+  --dsw-alias-label-primary:#1B1813;
+  --dsw-alias-label-secondary:#57503F;
+  --dsw-alias-label-tertiary:#6D6656;
+  --dsw-alias-label-caption:#756D5A;
+  --dsw-alias-markdown-placeholder:#6D6656;
+  --dsw-alias-brand-primary:#23211B;
+  --dsw-alias-brand-text:#23211B;
+  --dsw-alias-button-primary-fill:#23211B;
+  --dsw-alias-button-primary-hover:#3A362C;
+  --dsw-alias-button-contrast-fill:#57503F;
+  --dsw-alias-state-idle-primary:#CFC7B5;
+  --dsw-alias-interactive-bg-hover:rgba(60,48,20,.055);
+  --dsw-alias-interactive-bg-active:rgba(60,48,20,.09);
+  --dsw-alias-interactive-bg-hover-solid:#EDE6D8;
+  --dsw-alias-markdown-code-block:#F7F2E7;
+  --dsw-alias-markdown-code-block-banner:#F2EBDE;
+  --dsw-alias-markdown-inline-code:#F4EEE3;
+  --dsw-alias-markdown-tag:#EFE8D9;
+  --dsw-alias-markdown-citation:#ECE4D6;
+  --dsw-alias-link:#3B4A66;
+  --dsw-alias-state-business-primary:#3B4A66;
+  --dsw-alias-state-business-tertiary:#E7EAF1;
+  --dsw-alias-scrollbar-bg-l1:#DDD5C5;
+  --dsw-alias-scrollbar-hover-l1:#CEC5B2;
+  --dsw-alias-menu-group-header-fill:rgba(255,253,249,.94);
+}
+[data-scheme="paper"][data-mode="dark"]{
+  --dsw-alias-bg-base:#17140F;
+  --dsw-alias-bg-layer-1:#241F18;
+  --dsw-alias-bg-layer-2:#2A241B;
+  --dsw-alias-bg-layer-3:#332C21;
+  --dsw-alias-bg-overlay:#302A21;
+  --dsw-specific-input-major:#241F18;
+  --dsw-specific-sidebar-fill:#1E1913;
+  --dsw-specific-sidebar-nav-item-active:#2B241A;
+  --dsw-specific-sidebar-nav-item-active-accent:#382F22;
+  --dsw-specific-bubble:#262017;
+  --dsw-specific-bubble-highlight:#2F2820;
+  --dsw-specific-selector:#1D1812;
+  --dsw-specific-tip:#241F18;
+  --dsw-alias-border-l1:rgba(255,244,225,.10);
+  --dsw-alias-border-l2:rgba(255,244,225,.15);
+  --dsw-alias-border-l3:rgba(255,244,225,.19);
+  --dsw-alias-border-l4:rgba(255,244,225,.25);
+  --dsw-alias-label-primary:#F2ECE1;
+  --dsw-alias-label-secondary:#C9C0AF;
+  --dsw-alias-label-tertiary:#A79D8B;
+  --dsw-alias-label-caption:#8D8474;
+  --dsw-alias-markdown-placeholder:#A79D8B;
+  --dsw-alias-brand-primary:#EDE6D8;
+  --dsw-alias-brand-text:#EDE6D8;
+  --dsw-alias-button-primary-fill:#EDE6D8;
+  --dsw-alias-button-primary-hover:#FFFDF7;
+  --dsw-alias-button-contrast-fill:#C9C0AF;
+  --dsw-alias-state-idle-primary:#4A4438;
+  --dsw-alias-interactive-bg-hover:rgba(255,244,225,.07);
+  --dsw-alias-interactive-bg-active:rgba(255,244,225,.12);
+  --dsw-alias-interactive-bg-hover-solid:#2B241A;
+  --dsw-alias-markdown-code-block:#1B1710;
+  --dsw-alias-markdown-code-block-banner:#241E16;
+  --dsw-alias-markdown-inline-code:#201B14;
+  --dsw-alias-markdown-tag:#2A241B;
+  --dsw-alias-markdown-citation:#302A21;
+  --dsw-alias-link:#AFC0DE;
+  --dsw-alias-state-business-primary:#AFC0DE;
+  --dsw-alias-state-business-tertiary:#222733;
+  --dsw-alias-scrollbar-bg-l1:#3B352A;
+  --dsw-alias-scrollbar-hover-l1:#4A4335;
+  --dsw-alias-menu-group-header-fill:rgba(42,36,27,.94);
+}
+[data-pick="paper"]{--sw-base:#FCFAF6;--sw-side:#F3EEE3;--sw-bubble:#F4EEE1;--sw-accent:#3B4A66}
+[data-mode="dark"] [data-pick="paper"]{--sw-base:#17140F;--sw-side:#1E1913;--sw-bubble:#262017;--sw-accent:#AFC0DE}
+[data-scheme="mist"]{
+  --dsw-alias-bg-base:#F5F8FB;
+  --dsw-alias-bg-layer-1:#FFFFFF;
+  --dsw-alias-bg-layer-2:#FFFFFF;
+  --dsw-alias-bg-layer-3:#FFFFFF;
+  --dsw-alias-bg-overlay:#E3EBF3;
+  --dsw-specific-input-major:#FFFFFF;
+  --dsw-specific-sidebar-fill:#EBF1F7;
+  --dsw-specific-sidebar-nav-item-active:#E4EDF6;
+  --dsw-specific-sidebar-nav-item-active-accent:#D5E5F4;
+  --dsw-specific-bubble:#E6EFF7;
+  --dsw-specific-bubble-highlight:#D6E5F4;
+  --dsw-specific-selector:#EDF3F9;
+  --dsw-specific-tip:#F1F6FB;
+  --dsw-alias-border-l1:rgba(20,40,70,.07);
+  --dsw-alias-border-l2:rgba(20,40,70,.12);
+  --dsw-alias-border-l3:rgba(20,40,70,.16);
+  --dsw-alias-border-l4:rgba(20,40,70,.22);
+  --dsw-alias-label-primary:#121820;
+  --dsw-alias-label-secondary:#4C5866;
+  --dsw-alias-label-tertiary:#5F6C7B;
+  --dsw-alias-label-caption:#626F7D;
+  --dsw-alias-markdown-placeholder:#5F6C7B;
+  --dsw-alias-brand-primary:#17202B;
+  --dsw-alias-brand-text:#17202B;
+  --dsw-alias-button-primary-fill:#17202B;
+  --dsw-alias-button-primary-hover:#2A3947;
+  --dsw-alias-button-contrast-fill:#4C5866;
+  --dsw-alias-state-idle-primary:#C7D3DF;
+  --dsw-alias-interactive-bg-hover:rgba(20,40,70,.055);
+  --dsw-alias-interactive-bg-active:rgba(20,40,70,.09);
+  --dsw-alias-interactive-bg-hover-solid:#E4EDF6;
+  --dsw-alias-markdown-code-block:#F2F6FA;
+  --dsw-alias-markdown-code-block-banner:#EDF3F8;
+  --dsw-alias-markdown-inline-code:#EFF4F9;
+  --dsw-alias-markdown-tag:#E8EFF6;
+  --dsw-alias-markdown-citation:#E3ECF5;
+  --dsw-alias-link:#2D5F8F;
+  --dsw-alias-state-business-primary:#2D5F8F;
+  --dsw-alias-state-business-tertiary:#E1EBF5;
+  --dsw-alias-scrollbar-bg-l1:#D8E2EC;
+  --dsw-alias-scrollbar-hover-l1:#C7D5E3;
+  --dsw-alias-menu-group-header-fill:rgba(255,255,255,.94);
+}
+[data-scheme="mist"][data-mode="dark"]{
+  --dsw-alias-bg-base:#0F1419;
+  --dsw-alias-bg-layer-1:#1B2229;
+  --dsw-alias-bg-layer-2:#202831;
+  --dsw-alias-bg-layer-3:#262F39;
+  --dsw-alias-bg-overlay:#242E37;
+  --dsw-specific-input-major:#1B2229;
+  --dsw-specific-sidebar-fill:#151B21;
+  --dsw-specific-sidebar-nav-item-active:#1E2A36;
+  --dsw-specific-sidebar-nav-item-active-accent:#263644;
+  --dsw-specific-bubble:#19242E;
+  --dsw-specific-bubble-highlight:#21303C;
+  --dsw-specific-selector:#121920;
+  --dsw-specific-tip:#171F27;
+  --dsw-alias-border-l1:rgba(200,225,255,.10);
+  --dsw-alias-border-l2:rgba(200,225,255,.15);
+  --dsw-alias-border-l3:rgba(200,225,255,.19);
+  --dsw-alias-border-l4:rgba(200,225,255,.25);
+  --dsw-alias-label-primary:#E8F0F7;
+  --dsw-alias-label-secondary:#B3C0CC;
+  --dsw-alias-label-tertiary:#93A2B0;
+  --dsw-alias-label-caption:#7F8D9B;
+  --dsw-alias-markdown-placeholder:#93A2B0;
+  --dsw-alias-brand-primary:#EAF2F9;
+  --dsw-alias-brand-text:#EAF2F9;
+  --dsw-alias-button-primary-fill:#EAF2F9;
+  --dsw-alias-button-primary-hover:#FFFFFF;
+  --dsw-alias-button-contrast-fill:#B3C0CC;
+  --dsw-alias-state-idle-primary:#3E4A56;
+  --dsw-alias-interactive-bg-hover:rgba(200,225,255,.07);
+  --dsw-alias-interactive-bg-active:rgba(200,225,255,.12);
+  --dsw-alias-interactive-bg-hover-solid:#1E2A36;
+  --dsw-alias-markdown-code-block:#11171D;
+  --dsw-alias-markdown-code-block-banner:#171F27;
+  --dsw-alias-markdown-inline-code:#141C23;
+  --dsw-alias-markdown-tag:#1B2833;
+  --dsw-alias-markdown-citation:#242E37;
+  --dsw-alias-link:#8FB8E0;
+  --dsw-alias-state-business-primary:#8FB8E0;
+  --dsw-alias-state-business-tertiary:#1B2833;
+  --dsw-alias-scrollbar-bg-l1:#2A3540;
+  --dsw-alias-scrollbar-hover-l1:#394654;
+  --dsw-alias-menu-group-header-fill:rgba(32,40,49,.94);
+}
+[data-pick="mist"]{--sw-base:#F5F8FB;--sw-side:#EBF1F7;--sw-bubble:#E6EFF7;--sw-accent:#2D5F8F}
+[data-mode="dark"] [data-pick="mist"]{--sw-base:#0F1419;--sw-side:#151B21;--sw-bubble:#19242E;--sw-accent:#8FB8E0}
+[data-scheme="moss"]{
+  --dsw-alias-bg-base:#F7F8F2;
+  --dsw-alias-bg-layer-1:#FDFDF9;
+  --dsw-alias-bg-layer-2:#FDFDF9;
+  --dsw-alias-bg-layer-3:#FDFDF9;
+  --dsw-alias-bg-overlay:#E5E9D9;
+  --dsw-specific-input-major:#FDFDF9;
+  --dsw-specific-sidebar-fill:#EDF0E4;
+  --dsw-specific-sidebar-nav-item-active:#E7EBDA;
+  --dsw-specific-sidebar-nav-item-active-accent:#D9E2C9;
+  --dsw-specific-bubble:#EBF0DF;
+  --dsw-specific-bubble-highlight:#DFE7D1;
+  --dsw-specific-selector:#EFF2E8;
+  --dsw-specific-tip:#F3F6EE;
+  --dsw-alias-border-l1:rgba(40,55,20,.07);
+  --dsw-alias-border-l2:rgba(40,55,20,.12);
+  --dsw-alias-border-l3:rgba(40,55,20,.16);
+  --dsw-alias-border-l4:rgba(40,55,20,.22);
+  --dsw-alias-label-primary:#161C12;
+  --dsw-alias-label-secondary:#4A5542;
+  --dsw-alias-label-tertiary:#5C6853;
+  --dsw-alias-label-caption:#66725C;
+  --dsw-alias-markdown-placeholder:#5C6853;
+  --dsw-alias-brand-primary:#1B2216;
+  --dsw-alias-brand-text:#1B2216;
+  --dsw-alias-button-primary-fill:#1B2216;
+  --dsw-alias-button-primary-hover:#2C3626;
+  --dsw-alias-button-contrast-fill:#4A5542;
+  --dsw-alias-state-idle-primary:#CBD3BE;
+  --dsw-alias-interactive-bg-hover:rgba(40,55,20,.055);
+  --dsw-alias-interactive-bg-active:rgba(40,55,20,.09);
+  --dsw-alias-interactive-bg-hover-solid:#E7EBDA;
+  --dsw-alias-markdown-code-block:#F3F5EB;
+  --dsw-alias-markdown-code-block-banner:#EDF0E2;
+  --dsw-alias-markdown-inline-code:#F1F4E7;
+  --dsw-alias-markdown-tag:#E9EEDD;
+  --dsw-alias-markdown-citation:#E4EAD7;
+  --dsw-alias-link:#41633A;
+  --dsw-alias-state-business-primary:#41633A;
+  --dsw-alias-state-business-tertiary:#E3EBDD;
+  --dsw-alias-scrollbar-bg-l1:#D9DECB;
+  --dsw-alias-scrollbar-hover-l1:#C9D0BA;
+  --dsw-alias-menu-group-header-fill:rgba(253,253,249,.94);
+}
+[data-scheme="moss"][data-mode="dark"]{
+  --dsw-alias-bg-base:#12150F;
+  --dsw-alias-bg-layer-1:#1F2419;
+  --dsw-alias-bg-layer-2:#242A1D;
+  --dsw-alias-bg-layer-3:#2B3224;
+  --dsw-alias-bg-overlay:#2A3021;
+  --dsw-specific-input-major:#1F2419;
+  --dsw-specific-sidebar-fill:#181C14;
+  --dsw-specific-sidebar-nav-item-active:#222B1B;
+  --dsw-specific-sidebar-nav-item-active-accent:#2B3522;
+  --dsw-specific-bubble:#1E2516;
+  --dsw-specific-bubble-highlight:#27301D;
+  --dsw-specific-selector:#161A11;
+  --dsw-specific-tip:#1B2015;
+  --dsw-alias-border-l1:rgba(225,240,205,.10);
+  --dsw-alias-border-l2:rgba(225,240,205,.15);
+  --dsw-alias-border-l3:rgba(225,240,205,.19);
+  --dsw-alias-border-l4:rgba(225,240,205,.25);
+  --dsw-alias-label-primary:#EBEFE3;
+  --dsw-alias-label-secondary:#BCC5AF;
+  --dsw-alias-label-tertiary:#9BA68D;
+  --dsw-alias-label-caption:#85907A;
+  --dsw-alias-markdown-placeholder:#9BA68D;
+  --dsw-alias-brand-primary:#E7EEDD;
+  --dsw-alias-brand-text:#E7EEDD;
+  --dsw-alias-button-primary-fill:#E7EEDD;
+  --dsw-alias-button-primary-hover:#F7FBEE;
+  --dsw-alias-button-contrast-fill:#BCC5AF;
+  --dsw-alias-state-idle-primary:#434C38;
+  --dsw-alias-interactive-bg-hover:rgba(225,240,205,.07);
+  --dsw-alias-interactive-bg-active:rgba(225,240,205,.12);
+  --dsw-alias-interactive-bg-hover-solid:#222B1B;
+  --dsw-alias-markdown-code-block:#141810;
+  --dsw-alias-markdown-code-block-banner:#1B2015;
+  --dsw-alias-markdown-inline-code:#171C12;
+  --dsw-alias-markdown-tag:#1E2719;
+  --dsw-alias-markdown-citation:#2A3021;
+  --dsw-alias-link:#A6C98F;
+  --dsw-alias-state-business-primary:#A6C98F;
+  --dsw-alias-state-business-tertiary:#1E2719;
+  --dsw-alias-scrollbar-bg-l1:#333C2B;
+  --dsw-alias-scrollbar-hover-l1:#414A36;
+  --dsw-alias-menu-group-header-fill:rgba(36,42,29,.94);
+}
+[data-pick="moss"]{--sw-base:#F7F8F2;--sw-side:#EDF0E4;--sw-bubble:#EBF0DF;--sw-accent:#41633A}
+[data-mode="dark"] [data-pick="moss"]{--sw-base:#12150F;--sw-side:#181C14;--sw-bubble:#1E2516;--sw-accent:#A6C98F}
+[data-scheme="iris"]{
+  --dsw-alias-bg-base:#FAF8FB;
+  --dsw-alias-bg-layer-1:#FFFFFF;
+  --dsw-alias-bg-layer-2:#FFFFFF;
+  --dsw-alias-bg-layer-3:#FFFFFF;
+  --dsw-alias-bg-overlay:#E9E2EE;
+  --dsw-specific-input-major:#FFFFFF;
+  --dsw-specific-sidebar-fill:#F2EDF5;
+  --dsw-specific-sidebar-nav-item-active:#EDE5F2;
+  --dsw-specific-sidebar-nav-item-active-accent:#E2D6EC;
+  --dsw-specific-bubble:#F2EAF6;
+  --dsw-specific-bubble-highlight:#E5D8EE;
+  --dsw-specific-selector:#F5EFF7;
+  --dsw-specific-tip:#F8F3FA;
+  --dsw-alias-border-l1:rgba(50,30,60,.07);
+  --dsw-alias-border-l2:rgba(50,30,60,.12);
+  --dsw-alias-border-l3:rgba(50,30,60,.16);
+  --dsw-alias-border-l4:rgba(50,30,60,.22);
+  --dsw-alias-label-primary:#1A1620;
+  --dsw-alias-label-secondary:#514859;
+  --dsw-alias-label-tertiary:#63596C;
+  --dsw-alias-label-caption:#736880;
+  --dsw-alias-markdown-placeholder:#63596C;
+  --dsw-alias-brand-primary:#211A28;
+  --dsw-alias-brand-text:#211A28;
+  --dsw-alias-button-primary-fill:#211A28;
+  --dsw-alias-button-primary-hover:#352B3D;
+  --dsw-alias-button-contrast-fill:#514859;
+  --dsw-alias-state-idle-primary:#D3C6DA;
+  --dsw-alias-interactive-bg-hover:rgba(50,30,60,.055);
+  --dsw-alias-interactive-bg-active:rgba(50,30,60,.09);
+  --dsw-alias-interactive-bg-hover-solid:#EDE5F2;
+  --dsw-alias-markdown-code-block:#F7F3F9;
+  --dsw-alias-markdown-code-block-banner:#F2ECF5;
+  --dsw-alias-markdown-inline-code:#F5EFF8;
+  --dsw-alias-markdown-tag:#EFE7F3;
+  --dsw-alias-markdown-citation:#EAE1EF;
+  --dsw-alias-link:#654A7A;
+  --dsw-alias-state-business-primary:#654A7A;
+  --dsw-alias-state-business-tertiary:#EAE1F1;
+  --dsw-alias-scrollbar-bg-l1:#DED4E4;
+  --dsw-alias-scrollbar-hover-l1:#CFC2D6;
+  --dsw-alias-menu-group-header-fill:rgba(255,255,255,.94);
+}
+[data-scheme="iris"][data-mode="dark"]{
+  --dsw-alias-bg-base:#14121A;
+  --dsw-alias-bg-layer-1:#211D28;
+  --dsw-alias-bg-layer-2:#272231;
+  --dsw-alias-bg-layer-3:#2E2838;
+  --dsw-alias-bg-overlay:#2C2736;
+  --dsw-specific-input-major:#211D28;
+  --dsw-specific-sidebar-fill:#1A1721;
+  --dsw-specific-sidebar-nav-item-active:#252030;
+  --dsw-specific-sidebar-nav-item-active-accent:#2F283B;
+  --dsw-specific-bubble:#221C2A;
+  --dsw-specific-bubble-highlight:#2B2434;
+  --dsw-specific-selector:#18141F;
+  --dsw-specific-tip:#1D1825;
+  --dsw-alias-border-l1:rgba(235,220,250,.10);
+  --dsw-alias-border-l2:rgba(235,220,250,.15);
+  --dsw-alias-border-l3:rgba(235,220,250,.19);
+  --dsw-alias-border-l4:rgba(235,220,250,.25);
+  --dsw-alias-label-primary:#EFEAF5;
+  --dsw-alias-label-secondary:#C3BACC;
+  --dsw-alias-label-tertiary:#A69BB2;
+  --dsw-alias-label-caption:#8F849B;
+  --dsw-alias-markdown-placeholder:#A69BB2;
+  --dsw-alias-brand-primary:#EEE7F4;
+  --dsw-alias-brand-text:#EEE7F4;
+  --dsw-alias-button-primary-fill:#EEE7F4;
+  --dsw-alias-button-primary-hover:#FBF6FF;
+  --dsw-alias-button-contrast-fill:#C3BACC;
+  --dsw-alias-state-idle-primary:#453F4E;
+  --dsw-alias-interactive-bg-hover:rgba(235,220,250,.07);
+  --dsw-alias-interactive-bg-active:rgba(235,220,250,.12);
+  --dsw-alias-interactive-bg-hover-solid:#252030;
+  --dsw-alias-markdown-code-block:#161219;
+  --dsw-alias-markdown-code-block-banner:#1D1825;
+  --dsw-alias-markdown-inline-code:#191420;
+  --dsw-alias-markdown-tag:#292035;
+  --dsw-alias-markdown-citation:#2C2736;
+  --dsw-alias-link:#C0A6D6;
+  --dsw-alias-state-business-primary:#C0A6D6;
+  --dsw-alias-state-business-tertiary:#292035;
+  --dsw-alias-scrollbar-bg-l1:#3A3345;
+  --dsw-alias-scrollbar-hover-l1:#493F55;
+  --dsw-alias-menu-group-header-fill:rgba(39,34,49,.94);
+}
+[data-pick="iris"]{--sw-base:#FAF8FB;--sw-side:#F2EDF5;--sw-bubble:#F2EAF6;--sw-accent:#654A7A}
+[data-mode="dark"] [data-pick="iris"]{--sw-base:#14121A;--sw-side:#1A1721;--sw-bubble:#221C2A;--sw-accent:#C0A6D6}
+[data-scheme="celadon"]{
+  --dsw-alias-bg-base:#F4F8F6;
+  --dsw-alias-bg-layer-1:#FFFFFF;
+  --dsw-alias-bg-layer-2:#FFFFFF;
+  --dsw-alias-bg-layer-3:#FFFFFF;
+  --dsw-alias-bg-overlay:#DFEAE5;
+  --dsw-specific-input-major:#FFFFFF;
+  --dsw-specific-sidebar-fill:#EAF2EE;
+  --dsw-specific-sidebar-nav-item-active:#E2EEE9;
+  --dsw-specific-sidebar-nav-item-active-accent:#D2E7DF;
+  --dsw-specific-bubble:#E3F0EB;
+  --dsw-specific-bubble-highlight:#D3E8E1;
+  --dsw-specific-selector:#ECF3F0;
+  --dsw-specific-tip:#F0F7F4;
+  --dsw-alias-border-l1:rgba(15,45,35,.07);
+  --dsw-alias-border-l2:rgba(15,45,35,.12);
+  --dsw-alias-border-l3:rgba(15,45,35,.16);
+  --dsw-alias-border-l4:rgba(15,45,35,.22);
+  --dsw-alias-label-primary:#101A16;
+  --dsw-alias-label-secondary:#46554E;
+  --dsw-alias-label-tertiary:#586760;
+  --dsw-alias-label-caption:#61716A;
+  --dsw-alias-markdown-placeholder:#586760;
+  --dsw-alias-brand-primary:#14201C;
+  --dsw-alias-brand-text:#14201C;
+  --dsw-alias-button-primary-fill:#14201C;
+  --dsw-alias-button-primary-hover:#263530;
+  --dsw-alias-button-contrast-fill:#46554E;
+  --dsw-alias-state-idle-primary:#C3D2CB;
+  --dsw-alias-interactive-bg-hover:rgba(15,45,35,.055);
+  --dsw-alias-interactive-bg-active:rgba(15,45,35,.09);
+  --dsw-alias-interactive-bg-hover-solid:#E2EEE9;
+  --dsw-alias-markdown-code-block:#F1F6F4;
+  --dsw-alias-markdown-code-block-banner:#EBF2EF;
+  --dsw-alias-markdown-inline-code:#EFF5F2;
+  --dsw-alias-markdown-tag:#E7F0EC;
+  --dsw-alias-markdown-citation:#E0ECE7;
+  --dsw-alias-link:#14695F;
+  --dsw-alias-state-business-primary:#14695F;
+  --dsw-alias-state-business-tertiary:#DDEDE8;
+  --dsw-alias-scrollbar-bg-l1:#D5E2DC;
+  --dsw-alias-scrollbar-hover-l1:#C3D5CD;
+  --dsw-alias-menu-group-header-fill:rgba(255,255,255,.94);
+}
+[data-scheme="celadon"][data-mode="dark"]{
+  --dsw-alias-bg-base:#0E1513;
+  --dsw-alias-bg-layer-1:#19231F;
+  --dsw-alias-bg-layer-2:#1F2A25;
+  --dsw-alias-bg-layer-3:#26332E;
+  --dsw-alias-bg-overlay:#22302B;
+  --dsw-specific-input-major:#19231F;
+  --dsw-specific-sidebar-fill:#131B18;
+  --dsw-specific-sidebar-nav-item-active:#1C2A26;
+  --dsw-specific-sidebar-nav-item-active-accent:#243530;
+  --dsw-specific-bubble:#17251F;
+  --dsw-specific-bubble-highlight:#1F2F29;
+  --dsw-specific-selector:#121A17;
+  --dsw-specific-tip:#16201C;
+  --dsw-alias-border-l1:rgba(210,245,235,.10);
+  --dsw-alias-border-l2:rgba(210,245,235,.15);
+  --dsw-alias-border-l3:rgba(210,245,235,.19);
+  --dsw-alias-border-l4:rgba(210,245,235,.25);
+  --dsw-alias-label-primary:#E5F0EB;
+  --dsw-alias-label-secondary:#B0C4BC;
+  --dsw-alias-label-tertiary:#91A79E;
+  --dsw-alias-label-caption:#7C938A;
+  --dsw-alias-markdown-placeholder:#91A79E;
+  --dsw-alias-brand-primary:#E3F1EC;
+  --dsw-alias-brand-text:#E3F1EC;
+  --dsw-alias-button-primary-fill:#E3F1EC;
+  --dsw-alias-button-primary-hover:#F5FFFB;
+  --dsw-alias-button-contrast-fill:#B0C4BC;
+  --dsw-alias-state-idle-primary:#3B4B45;
+  --dsw-alias-interactive-bg-hover:rgba(210,245,235,.07);
+  --dsw-alias-interactive-bg-active:rgba(210,245,235,.12);
+  --dsw-alias-interactive-bg-hover-solid:#1C2A26;
+  --dsw-alias-markdown-code-block:#101715;
+  --dsw-alias-markdown-code-block-banner:#16201C;
+  --dsw-alias-markdown-inline-code:#131B18;
+  --dsw-alias-markdown-tag:#16231F;
+  --dsw-alias-markdown-citation:#22302B;
+  --dsw-alias-link:#7FD0C0;
+  --dsw-alias-state-business-primary:#7FD0C0;
+  --dsw-alias-state-business-tertiary:#16231F;
+  --dsw-alias-scrollbar-bg-l1:#2B3833;
+  --dsw-alias-scrollbar-hover-l1:#384741;
+  --dsw-alias-menu-group-header-fill:rgba(31,42,37,.94);
+}
+[data-pick="celadon"]{--sw-base:#F4F8F6;--sw-side:#EAF2EE;--sw-bubble:#E3F0EB;--sw-accent:#14695F}
+[data-mode="dark"] [data-pick="celadon"]{--sw-base:#0E1513;--sw-side:#131B18;--sw-bubble:#17251F;--sw-accent:#7FD0C0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <div>
+      <h1>DSH 配色方案</h1>
+      <p class="lede">五套方案都从 DSH 现在的单色骨架出发，只改四个地方：<b>画布的温度、侧栏的深浅、气泡的色相、强调色</b>。每套各有浅色与深色两版，正文对比度都在 15:1 以上，说明文字不低于 4.8:1。</p>
+    </div>
+    <div class="meta"><strong>5 套 × 2 模式</strong>2026.11 · 预览稿</div>
+  </header>
+
+  <section class="stage" aria-label="配色预览">
+    <div class="tabbar">
+      <div class="tabs" aria-label="配色方案">
+      <button class="tab" data-pick="paper" aria-pressed="true"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">纸白</span><span class="en">Paper</span></button>
+      <button class="tab" data-pick="mist" aria-pressed="false"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">雾蓝</span><span class="en">Mist</span></button>
+      <button class="tab" data-pick="moss" aria-pressed="false"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">苔绿</span><span class="en">Moss</span></button>
+      <button class="tab" data-pick="iris" aria-pressed="false"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">藕荷</span><span class="en">Iris</span></button>
+      <button class="tab" data-pick="celadon" aria-pressed="false"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">青瓷</span><span class="en">Celadon</span></button>
+      </div>
+      <div class="tabtools">
+        <span class="tabhint">1–5</span>
+        <div class="modes" role="group" aria-label="外观模式">
+          <button type="button" data-mode-pick="light" aria-pressed="true">浅色</button>
+          <button type="button" data-mode-pick="dark" aria-pressed="false">深色</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="win live" data-scheme="paper" data-mode="light" role="img" aria-label="DSH 聊天界面配色预览">
+        <div class="tb">
+          <div class="mark"><i></i><i></i><i></i></div>
+          <div class="t">DeepSeek Harness</div>
+          <div class="wc">
+            <span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 5h6"/></svg></span>
+            <span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2.2" y="2.2" width="5.6" height="5.6"/></svg></span>
+            <span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/></svg></span>
+          </div>
+        </div>
+        <div class="body">
+          <aside class="side">
+            <div class="brand">
+              <span class="sign"><i></i><i></i><i></i></span>
+              <b>DeepSeek Harness</b>
+              <svg class="chev" width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 4.5L6 7.5l3-3"/></svg>
+            </div>
+            <div class="sec"><span>工作区</span><span class="add"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 2v8M2 6h8"/></svg></span></div>
+            <div class="grp">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 3.5h3l1 1.2h5v4.8h-9z"/></svg>
+              <span>dsh-themes</span>
+            </div>
+            <div class="row" aria-current="true"><span class="sl">配色方案预览</span><time>刚刚</time></div>
+            <div class="row"><span class="sl">消息折叠与回退按钮冲突</span></div>
+            <div class="row"><span class="sl">修复终端换行偏移</span></div>
+            <div class="row"><span class="sl">整理 Cordis 组合补丁</span></div>
+            <div class="row"><span class="sl">把工具卡片收成一行</span></div>
+            <div class="row"><span class="sl">远程会话的快捷入口</span></div>
+            <div class="foot">
+              <div class="row"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="2.1"/><path d="M8 1.7v1.7M8 12.6v1.7M1.7 8h1.7M12.6 8h1.7M3.55 3.55l1.2 1.2M11.25 11.25l1.2 1.2M12.45 3.55l-1.2 1.2M4.75 11.25l-1.2 1.2"/></svg><span class="sl">设置</span></div>
+            </div>
+          </aside>
+          <main class="main">
+            <div class="chead"><div class="chead-in">
+              <span class="title">配色方案预览</span>
+              <div class="acts">
+                <span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M5.2 8.8L9.4 4.6a2 2 0 112.8 2.8L8 11.6a3.2 3.2 0 11-4.5-4.5l4.1-4.1"/></svg></span>
+                <span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="3.2" cy="8" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="12.8" cy="8" r="1"/></svg></span>
+              </div>
+            </div></div>
+            <div class="scroll">
+              <div class="thread">
+                <div class="urow">
+                  <div class="bubble">给 DSH 做几套浅色配色，先在 HTML 里看看效果，选定后再做成插件。别影响文字的可读性。</div>
+                </div>
+                <div class="arow">
+                  <p>先做五版，只改画布、侧栏、气泡和强调色四个维度，其余沿用同一套 alias token，可对照 <a class="lnk" href="#" onclick="return false">token 表</a>。深色外观保持原样，切换入口放在「设置 → 通用」。</p>
+                  <p class="dim">每套都过一遍对比度：正文 15:1 以上，次要文字 6:1 以上，说明文字也不低于 4.5:1。</p>
+                </div>
+                <div class="tool">
+                  <div class="th">
+                    <span class="dot"></span><span class="tn">读取</span>
+                    <span class="tm">ui-theme/README.md · palettes.json</span>
+                    <span class="tc"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 4.5L6 7.5l3-3"/></svg></span>
+                  </div>
+                </div>
+                <div class="code">
+                  <div class="ch"><span>palettes.css</span><span class="cp"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1"><rect x="4" y="4" width="6" height="6" rx="1"/><path d="M8 4V2.6A.6.6 0 007.4 2H2.6a.6.6 0 00-.6.6v4.8c0 .33.27.6.6.6H4"/></svg>复制</span></div>
+                  <pre><span class="sel" id="code-sel">[data-scheme="paper"]</span> {
+  <span class="k">--dsw-alias-bg-base</span>: <span class="v" data-token="--dsw-alias-bg-base">#FCFAF6</span>;
+  <span class="k">--dsw-specific-sidebar-fill</span>: <span class="v" data-token="--dsw-specific-sidebar-fill">#F3EEE3</span>;
+  <span class="k">--dsw-specific-bubble</span>: <span class="v" data-token="--dsw-specific-bubble">#F4EEE1</span>;
+  <span class="k">--dsw-alias-state-business-primary</span>: <span class="v" data-token="--dsw-alias-state-business-primary">#3B4A66</span>;
+}</pre>
+                </div>
+                <div class="arow">
+                  <p>五套里挑一套就行，也可以指定「纸白 + 苔绿的强调色」这种组合。</p>
+                </div>
+              </div>
+            </div>
+            <div class="composer">
+              <div class="ccard">
+                <div class="ph">描述你想改的地方…</div>
+                <div class="tools">
+                  <span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M11.7 7.3l-4.2 4.2a3.1 3.1 0 11-4.4-4.4l4.6-4.6a2.1 2.1 0 113 3l-4.6 4.6a1.1 1.1 0 11-1.6-1.6l4.1-4.1"/></svg></span>
+                  <span class="chip">DeepSeek V4.1<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 4.5L6 7.5l3-3"/></svg></span>
+                  <span class="chip">标准</span>
+                  <span class="send"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 12.5v-9M3.6 7.9L8 3.5l4.4 4.4"/></svg></span>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+    </div>
+
+    <div class="cap">
+        <div>
+          <h2><span id="cap-name">纸白</span><span class="en" id="cap-en">Paper</span><span class="mode-tag" id="cap-mode">浅色</span></h2>
+          <p class="idea" id="cap-idea">暖纸色的底，配墨蓝的强调色。把长时间阅读的白底冷光收一点，气泡用米色，不抢正文。</p>
+        </div>
+        <div class="vals">
+          <figure><i id="v-base"></i><figcaption id="h-base">#FCFAF6</figcaption></figure>
+          <figure><i id="v-side"></i><figcaption id="h-side">#F3EEE3</figcaption></figure>
+          <figure><i id="v-bubble"></i><figcaption id="h-bubble">#F4EEE1</figcaption></figure>
+          <figure><i id="v-accent"></i><figcaption id="h-accent">#3B4A66</figcaption></figure>
+        </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <h2>设置 · 通用</h2>
+      <p>插件在 <code>appearance</code> 之后加一行「配色方案」，与外观、字号并列。</p>
+    </div>
+    <div class="setwin live" data-scheme="paper" data-mode="light">
+      <nav class="setnav">
+        <div class="nt">设置</div>
+        <a href="#" aria-current="true" onclick="return false">通用</a>
+        <a href="#" onclick="return false">模型</a>
+        <a href="#" onclick="return false">插件</a>
+        <a href="#" onclick="return false">快捷键</a>
+        <a href="#" onclick="return false">关于</a>
+      </nav>
+      <div class="setbody">
+        <h3>通用</h3>
+        <div class="setrows">
+          <div class="setrow">
+            <div class="lb"><b>外观</b><span>浅色、深色，或跟随系统。</span></div>
+            <div class="ctl"><div class="seg"><span data-appearance="light" aria-pressed="true">浅色</span><span data-appearance="dark" aria-pressed="false">深色</span><span data-appearance="system">跟随系统</span></div></div>
+          </div>
+          <div class="setrow">
+              <div class="lb"><b>配色方案</b><span>浅色与深色各一套；跟随外观自动切换。</span></div>
+            <div class="ctl">
+              <div class="pal">
+                <button data-pick="paper" aria-pressed="true"><span class="chip"></span><span>纸白</span></button>
+                <button data-pick="mist" aria-pressed="false"><span class="chip"></span><span>雾蓝</span></button>
+                <button data-pick="moss" aria-pressed="false"><span class="chip"></span><span>苔绿</span></button>
+                <button data-pick="iris" aria-pressed="false"><span class="chip"></span><span>藕荷</span></button>
+                <button data-pick="celadon" aria-pressed="false"><span class="chip"></span><span>青瓷</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="setrow">
+            <div class="lb"><b>字号</b><span>正文与对话的基础字号。</span></div>
+            <div class="ctl"><div class="stepper"><i>−</i><b>14</b><i>+</i></div></div>
+          </div>
+          <div class="setrow">
+            <div class="lb"><b>发送键</b><span>Enter 发送，Shift + Enter 换行。</span></div>
+            <div class="ctl"><div class="seg"><span aria-pressed="true">Enter</span><span>Ctrl + Enter</span></div></div>
+          </div>
+        </div>
+        <p class="setnote">配色切换即时生效，不改动外观与字号设置。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <h2>并排对比</h2>
+      <p>同一屏内容在五套配色下的整体观感。</p>
+    </div>
+    <div class="grid" id="grid">
+      <button class="mini" data-pick="paper" data-scheme="paper" data-mode="light" aria-pressed="true" aria-label="纸白">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>纸白</b><span>Paper</span></span>
+      </button>
+      <button class="mini" data-pick="mist" data-scheme="mist" data-mode="light" aria-pressed="false" aria-label="雾蓝">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>雾蓝</b><span>Mist</span></span>
+      </button>
+      <button class="mini" data-pick="moss" data-scheme="moss" data-mode="light" aria-pressed="false" aria-label="苔绿">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>苔绿</b><span>Moss</span></span>
+      </button>
+      <button class="mini" data-pick="iris" data-scheme="iris" data-mode="light" aria-pressed="false" aria-label="藕荷">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>藕荷</b><span>Iris</span></span>
+      </button>
+      <button class="mini" data-pick="celadon" data-scheme="celadon" data-mode="light" aria-pressed="false" aria-label="青瓷">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>青瓷</b><span>Celadon</span></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="sec spec">
+    <div>
+      <h3>约束</h3>
+      <ul>
+        <li><b>文字对比度</b>：正文浅色 <code>16.3–17.0:1</code>、深色 <code>15.6–16.1:1</code>；次要 <code>≥6.8:1</code>；说明文字 <code>≥4.8:1</code>；气泡里的正文 <code>≥13.5:1</code>。</li>
+        <li><b>气泡与画布</b>：明度差浅色 <code>3.3–4.2 L*</code>、深色 <code>5.6–7.6 L*</code>，一眼能分出消息与底，又不喧宾夺主。</li>
+        <li><b>强调色</b>：只用于链接、选中行、焦点环与代码里的关键行；成功 / 警告 / 错误沿用 DSH 语义色，不跟着方案走。</li>
+        <li><b>结构</b>：边框仍是 <code>7%–25%</code> 的四级 hairline，圆角、字号、间距一律不动。</li>
+      </ul>
+    </div>
+    <div>
+      <h3>当前方案 · 关键 token</h3>
+      <table class="tbl">
+        <thead><tr><th>用途</th><th>token</th><th class="r">值 / 对比度</th></tr></thead>
+        <tbody id="spec-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>42 个 alias token × 浅色 / 深色 · 一套映射</span>
+    <span>结构示意 · 颜色为真实 token · 装配为 @local/dsh-light-palettes</span>
+  </footer>
+</div>
+
+<script>
+const P = {"paper": {"order": 1, "name": "纸白", "en": "Paper", "idea": "暖纸色的底，配墨蓝的强调色。把长时间阅读的白底冷光收一点，气泡用米色，不抢正文。", "base": "#FCFAF6", "sidebar": "#F3EEE3", "surface": "#FFFDF9", "bubble": "#F4EEE1", "accent": "#3B4A66", "ink": "#1B1813", "code": "#F7F2E7", "dark": {"base": "#17140F", "sidebar": "#1E1913", "surface": "#241F18", "bubble": "#262017", "accent": "#AFC0DE", "ink": "#F2ECE1", "code": "#1B1710"}, "tokens": {"--dsw-alias-bg-base": "#FCFAF6", "--dsw-alias-bg-layer-1": "#FFFDF9", "--dsw-alias-bg-layer-2": "#FFFDF9", "--dsw-alias-bg-layer-3": "#FFFDF9", "--dsw-alias-bg-overlay": "#EDE6D8", "--dsw-specific-input-major": "#FFFDF9", "--dsw-specific-sidebar-fill": "#F3EEE3", "--dsw-specific-sidebar-nav-item-active": "#EDE6D8", "--dsw-specific-sidebar-nav-item-active-accent": "#DFD5C0", "--dsw-specific-bubble": "#F4EEE1", "--dsw-specific-bubble-highlight": "#E9DFC9", "--dsw-specific-selector": "#F1EBDF", "--dsw-specific-tip": "#F6F1E7", "--dsw-alias-border-l1": "rgba(60,48,20,.07)", "--dsw-alias-border-l2": "rgba(60,48,20,.12)", "--dsw-alias-border-l3": "rgba(60,48,20,.16)", "--dsw-alias-border-l4": "rgba(60,48,20,.22)", "--dsw-alias-label-primary": "#1B1813", "--dsw-alias-label-secondary": "#57503F", "--dsw-alias-label-tertiary": "#6D6656", "--dsw-alias-label-caption": "#756D5A", "--dsw-alias-markdown-placeholder": "#6D6656", "--dsw-alias-brand-primary": "#23211B", "--dsw-alias-brand-text": "#23211B", "--dsw-alias-button-primary-fill": "#23211B", "--dsw-alias-button-primary-hover": "#3A362C", "--dsw-alias-button-contrast-fill": "#57503F", "--dsw-alias-state-idle-primary": "#CFC7B5", "--dsw-alias-interactive-bg-hover": "rgba(60,48,20,.055)", "--dsw-alias-interactive-bg-active": "rgba(60,48,20,.09)", "--dsw-alias-interactive-bg-hover-solid": "#EDE6D8", "--dsw-alias-markdown-code-block": "#F7F2E7", "--dsw-alias-markdown-code-block-banner": "#F2EBDE", "--dsw-alias-markdown-inline-code": "#F4EEE3", "--dsw-alias-markdown-tag": "#EFE8D9", "--dsw-alias-markdown-citation": "#ECE4D6", "--dsw-alias-link": "#3B4A66", "--dsw-alias-state-business-primary": "#3B4A66", "--dsw-alias-state-business-tertiary": "#E7EAF1", "--dsw-alias-scrollbar-bg-l1": "#DDD5C5", "--dsw-alias-scrollbar-hover-l1": "#CEC5B2", "--dsw-alias-menu-group-header-fill": "rgba(255,253,249,.94)"}, "darkTokens": {"--dsw-alias-bg-base": "#17140F", "--dsw-alias-bg-layer-1": "#241F18", "--dsw-alias-bg-layer-2": "#2A241B", "--dsw-alias-bg-layer-3": "#332C21", "--dsw-alias-bg-overlay": "#302A21", "--dsw-specific-input-major": "#241F18", "--dsw-specific-sidebar-fill": "#1E1913", "--dsw-specific-sidebar-nav-item-active": "#2B241A", "--dsw-specific-sidebar-nav-item-active-accent": "#382F22", "--dsw-specific-bubble": "#262017", "--dsw-specific-bubble-highlight": "#2F2820", "--dsw-specific-selector": "#1D1812", "--dsw-specific-tip": "#241F18", "--dsw-alias-border-l1": "rgba(255,244,225,.10)", "--dsw-alias-border-l2": "rgba(255,244,225,.15)", "--dsw-alias-border-l3": "rgba(255,244,225,.19)", "--dsw-alias-border-l4": "rgba(255,244,225,.25)", "--dsw-alias-label-primary": "#F2ECE1", "--dsw-alias-label-secondary": "#C9C0AF", "--dsw-alias-label-tertiary": "#A79D8B", "--dsw-alias-label-caption": "#8D8474", "--dsw-alias-markdown-placeholder": "#A79D8B", "--dsw-alias-brand-primary": "#EDE6D8", "--dsw-alias-brand-text": "#EDE6D8", "--dsw-alias-button-primary-fill": "#EDE6D8", "--dsw-alias-button-primary-hover": "#FFFDF7", "--dsw-alias-button-contrast-fill": "#C9C0AF", "--dsw-alias-state-idle-primary": "#4A4438", "--dsw-alias-interactive-bg-hover": "rgba(255,244,225,.07)", "--dsw-alias-interactive-bg-active": "rgba(255,244,225,.12)", "--dsw-alias-interactive-bg-hover-solid": "#2B241A", "--dsw-alias-markdown-code-block": "#1B1710", "--dsw-alias-markdown-code-block-banner": "#241E16", "--dsw-alias-markdown-inline-code": "#201B14", "--dsw-alias-markdown-tag": "#2A241B", "--dsw-alias-markdown-citation": "#302A21", "--dsw-alias-link": "#AFC0DE", "--dsw-alias-state-business-primary": "#AFC0DE", "--dsw-alias-state-business-tertiary": "#222733", "--dsw-alias-scrollbar-bg-l1": "#3B352A", "--dsw-alias-scrollbar-hover-l1": "#4A4335", "--dsw-alias-menu-group-header-fill": "rgba(42,36,27,.94)"}, "ratios": {"ink": 17.0, "sec": 7.7, "ter": 5.5, "cap": 4.9, "accent": 8.5, "brand": 16.1}, "darkRatios": {"ink": 15.6, "sec": 10.2, "ter": 6.9, "cap": 5.0, "accent": 10.0, "brand": 15.2}}, "mist": {"order": 2, "name": "雾蓝", "en": "Mist", "idea": "冷灰蓝的底，强调色压成石板蓝。最接近 DSH 原本的冷调，但把纯白换成有空气感的雾面。", "base": "#F5F8FB", "sidebar": "#EBF1F7", "surface": "#FFFFFF", "bubble": "#E6EFF7", "accent": "#2D5F8F", "ink": "#121820", "code": "#F2F6FA", "dark": {"base": "#0F1419", "sidebar": "#151B21", "surface": "#1B2229", "bubble": "#19242E", "accent": "#8FB8E0", "ink": "#E8F0F7", "code": "#11171D"}, "tokens": {"--dsw-alias-bg-base": "#F5F8FB", "--dsw-alias-bg-layer-1": "#FFFFFF", "--dsw-alias-bg-layer-2": "#FFFFFF", "--dsw-alias-bg-layer-3": "#FFFFFF", "--dsw-alias-bg-overlay": "#E3EBF3", "--dsw-specific-input-major": "#FFFFFF", "--dsw-specific-sidebar-fill": "#EBF1F7", "--dsw-specific-sidebar-nav-item-active": "#E4EDF6", "--dsw-specific-sidebar-nav-item-active-accent": "#D5E5F4", "--dsw-specific-bubble": "#E6EFF7", "--dsw-specific-bubble-highlight": "#D6E5F4", "--dsw-specific-selector": "#EDF3F9", "--dsw-specific-tip": "#F1F6FB", "--dsw-alias-border-l1": "rgba(20,40,70,.07)", "--dsw-alias-border-l2": "rgba(20,40,70,.12)", "--dsw-alias-border-l3": "rgba(20,40,70,.16)", "--dsw-alias-border-l4": "rgba(20,40,70,.22)", "--dsw-alias-label-primary": "#121820", "--dsw-alias-label-secondary": "#4C5866", "--dsw-alias-label-tertiary": "#5F6C7B", "--dsw-alias-label-caption": "#626F7D", "--dsw-alias-markdown-placeholder": "#5F6C7B", "--dsw-alias-brand-primary": "#17202B", "--dsw-alias-brand-text": "#17202B", "--dsw-alias-button-primary-fill": "#17202B", "--dsw-alias-button-primary-hover": "#2A3947", "--dsw-alias-button-contrast-fill": "#4C5866", "--dsw-alias-state-idle-primary": "#C7D3DF", "--dsw-alias-interactive-bg-hover": "rgba(20,40,70,.055)", "--dsw-alias-interactive-bg-active": "rgba(20,40,70,.09)", "--dsw-alias-interactive-bg-hover-solid": "#E4EDF6", "--dsw-alias-markdown-code-block": "#F2F6FA", "--dsw-alias-markdown-code-block-banner": "#EDF3F8", "--dsw-alias-markdown-inline-code": "#EFF4F9", "--dsw-alias-markdown-tag": "#E8EFF6", "--dsw-alias-markdown-citation": "#E3ECF5", "--dsw-alias-link": "#2D5F8F", "--dsw-alias-state-business-primary": "#2D5F8F", "--dsw-alias-state-business-tertiary": "#E1EBF5", "--dsw-alias-scrollbar-bg-l1": "#D8E2EC", "--dsw-alias-scrollbar-hover-l1": "#C7D5E3", "--dsw-alias-menu-group-header-fill": "rgba(255,255,255,.94)"}, "darkTokens": {"--dsw-alias-bg-base": "#0F1419", "--dsw-alias-bg-layer-1": "#1B2229", "--dsw-alias-bg-layer-2": "#202831", "--dsw-alias-bg-layer-3": "#262F39", "--dsw-alias-bg-overlay": "#242E37", "--dsw-specific-input-major": "#1B2229", "--dsw-specific-sidebar-fill": "#151B21", "--dsw-specific-sidebar-nav-item-active": "#1E2A36", "--dsw-specific-sidebar-nav-item-active-accent": "#263644", "--dsw-specific-bubble": "#19242E", "--dsw-specific-bubble-highlight": "#21303C", "--dsw-specific-selector": "#121920", "--dsw-specific-tip": "#171F27", "--dsw-alias-border-l1": "rgba(200,225,255,.10)", "--dsw-alias-border-l2": "rgba(200,225,255,.15)", "--dsw-alias-border-l3": "rgba(200,225,255,.19)", "--dsw-alias-border-l4": "rgba(200,225,255,.25)", "--dsw-alias-label-primary": "#E8F0F7", "--dsw-alias-label-secondary": "#B3C0CC", "--dsw-alias-label-tertiary": "#93A2B0", "--dsw-alias-label-caption": "#7F8D9B", "--dsw-alias-markdown-placeholder": "#93A2B0", "--dsw-alias-brand-primary": "#EAF2F9", "--dsw-alias-brand-text": "#EAF2F9", "--dsw-alias-button-primary-fill": "#EAF2F9", "--dsw-alias-button-primary-hover": "#FFFFFF", "--dsw-alias-button-contrast-fill": "#B3C0CC", "--dsw-alias-state-idle-primary": "#3E4A56", "--dsw-alias-interactive-bg-hover": "rgba(200,225,255,.07)", "--dsw-alias-interactive-bg-active": "rgba(200,225,255,.12)", "--dsw-alias-interactive-bg-hover-solid": "#1E2A36", "--dsw-alias-markdown-code-block": "#11171D", "--dsw-alias-markdown-code-block-banner": "#171F27", "--dsw-alias-markdown-inline-code": "#141C23", "--dsw-alias-markdown-tag": "#1B2833", "--dsw-alias-markdown-citation": "#242E37", "--dsw-alias-link": "#8FB8E0", "--dsw-alias-state-business-primary": "#8FB8E0", "--dsw-alias-state-business-tertiary": "#1B2833", "--dsw-alias-scrollbar-bg-l1": "#2A3540", "--dsw-alias-scrollbar-hover-l1": "#394654", "--dsw-alias-menu-group-header-fill": "rgba(32,40,49,.94)"}, "ratios": {"ink": 16.7, "sec": 6.8, "ter": 5.0, "cap": 4.8, "accent": 6.3, "brand": 16.4}, "darkRatios": {"ink": 16.1, "sec": 10.0, "ter": 7.1, "cap": 5.5, "accent": 8.9, "brand": 16.7}}, "moss": {"order": 3, "name": "苔绿", "en": "Moss", "idea": "鼠尾草绿的底，苔绿做强调。整个界面像一张护眼的稿纸，代码块和标签都带一点草本的灰。", "base": "#F7F8F2", "sidebar": "#EDF0E4", "surface": "#FDFDF9", "bubble": "#EBF0DF", "accent": "#41633A", "ink": "#161C12", "code": "#F3F5EB", "dark": {"base": "#12150F", "sidebar": "#181C14", "surface": "#1F2419", "bubble": "#1E2516", "accent": "#A6C98F", "ink": "#EBEFE3", "code": "#141810"}, "tokens": {"--dsw-alias-bg-base": "#F7F8F2", "--dsw-alias-bg-layer-1": "#FDFDF9", "--dsw-alias-bg-layer-2": "#FDFDF9", "--dsw-alias-bg-layer-3": "#FDFDF9", "--dsw-alias-bg-overlay": "#E5E9D9", "--dsw-specific-input-major": "#FDFDF9", "--dsw-specific-sidebar-fill": "#EDF0E4", "--dsw-specific-sidebar-nav-item-active": "#E7EBDA", "--dsw-specific-sidebar-nav-item-active-accent": "#D9E2C9", "--dsw-specific-bubble": "#EBF0DF", "--dsw-specific-bubble-highlight": "#DFE7D1", "--dsw-specific-selector": "#EFF2E8", "--dsw-specific-tip": "#F3F6EE", "--dsw-alias-border-l1": "rgba(40,55,20,.07)", "--dsw-alias-border-l2": "rgba(40,55,20,.12)", "--dsw-alias-border-l3": "rgba(40,55,20,.16)", "--dsw-alias-border-l4": "rgba(40,55,20,.22)", "--dsw-alias-label-primary": "#161C12", "--dsw-alias-label-secondary": "#4A5542", "--dsw-alias-label-tertiary": "#5C6853", "--dsw-alias-label-caption": "#66725C", "--dsw-alias-markdown-placeholder": "#5C6853", "--dsw-alias-brand-primary": "#1B2216", "--dsw-alias-brand-text": "#1B2216", "--dsw-alias-button-primary-fill": "#1B2216", "--dsw-alias-button-primary-hover": "#2C3626", "--dsw-alias-button-contrast-fill": "#4A5542", "--dsw-alias-state-idle-primary": "#CBD3BE", "--dsw-alias-interactive-bg-hover": "rgba(40,55,20,.055)", "--dsw-alias-interactive-bg-active": "rgba(40,55,20,.09)", "--dsw-alias-interactive-bg-hover-solid": "#E7EBDA", "--dsw-alias-markdown-code-block": "#F3F5EB", "--dsw-alias-markdown-code-block-banner": "#EDF0E2", "--dsw-alias-markdown-inline-code": "#F1F4E7", "--dsw-alias-markdown-tag": "#E9EEDD", "--dsw-alias-markdown-citation": "#E4EAD7", "--dsw-alias-link": "#41633A", "--dsw-alias-state-business-primary": "#41633A", "--dsw-alias-state-business-tertiary": "#E3EBDD", "--dsw-alias-scrollbar-bg-l1": "#D9DECB", "--dsw-alias-scrollbar-hover-l1": "#C9D0BA", "--dsw-alias-menu-group-header-fill": "rgba(253,253,249,.94)"}, "darkTokens": {"--dsw-alias-bg-base": "#12150F", "--dsw-alias-bg-layer-1": "#1F2419", "--dsw-alias-bg-layer-2": "#242A1D", "--dsw-alias-bg-layer-3": "#2B3224", "--dsw-alias-bg-overlay": "#2A3021", "--dsw-specific-input-major": "#1F2419", "--dsw-specific-sidebar-fill": "#181C14", "--dsw-specific-sidebar-nav-item-active": "#222B1B", "--dsw-specific-sidebar-nav-item-active-accent": "#2B3522", "--dsw-specific-bubble": "#1E2516", "--dsw-specific-bubble-highlight": "#27301D", "--dsw-specific-selector": "#161A11", "--dsw-specific-tip": "#1B2015", "--dsw-alias-border-l1": "rgba(225,240,205,.10)", "--dsw-alias-border-l2": "rgba(225,240,205,.15)", "--dsw-alias-border-l3": "rgba(225,240,205,.19)", "--dsw-alias-border-l4": "rgba(225,240,205,.25)", "--dsw-alias-label-primary": "#EBEFE3", "--dsw-alias-label-secondary": "#BCC5AF", "--dsw-alias-label-tertiary": "#9BA68D", "--dsw-alias-label-caption": "#85907A", "--dsw-alias-markdown-placeholder": "#9BA68D", "--dsw-alias-brand-primary": "#E7EEDD", "--dsw-alias-brand-text": "#E7EEDD", "--dsw-alias-button-primary-fill": "#E7EEDD", "--dsw-alias-button-primary-hover": "#F7FBEE", "--dsw-alias-button-contrast-fill": "#BCC5AF", "--dsw-alias-state-idle-primary": "#434C38", "--dsw-alias-interactive-bg-hover": "rgba(225,240,205,.07)", "--dsw-alias-interactive-bg-active": "rgba(225,240,205,.12)", "--dsw-alias-interactive-bg-hover-solid": "#222B1B", "--dsw-alias-markdown-code-block": "#141810", "--dsw-alias-markdown-code-block-banner": "#1B2015", "--dsw-alias-markdown-inline-code": "#171C12", "--dsw-alias-markdown-tag": "#1E2719", "--dsw-alias-markdown-citation": "#2A3021", "--dsw-alias-link": "#A6C98F", "--dsw-alias-state-business-primary": "#A6C98F", "--dsw-alias-state-business-tertiary": "#1E2719", "--dsw-alias-scrollbar-bg-l1": "#333C2B", "--dsw-alias-scrollbar-hover-l1": "#414A36", "--dsw-alias-menu-group-header-fill": "rgba(36,42,29,.94)"}, "ratios": {"ink": 16.3, "sec": 7.4, "ter": 5.5, "cap": 4.8, "accent": 6.4, "brand": 16.3}, "darkRatios": {"ink": 15.8, "sec": 10.3, "ter": 7.2, "cap": 5.5, "accent": 10.0, "brand": 15.9}}, "iris": {"order": 4, "name": "藕荷", "en": "Iris", "idea": "灰紫的底，强调色是干枯的梅子紫。温柔但不甜，气泡和选中行都落在同一支紫调上。", "base": "#FAF8FB", "sidebar": "#F2EDF5", "surface": "#FFFFFF", "bubble": "#F2EAF6", "accent": "#654A7A", "ink": "#1A1620", "code": "#F7F3F9", "dark": {"base": "#14121A", "sidebar": "#1A1721", "surface": "#211D28", "bubble": "#221C2A", "accent": "#C0A6D6", "ink": "#EFEAF5", "code": "#161219"}, "tokens": {"--dsw-alias-bg-base": "#FAF8FB", "--dsw-alias-bg-layer-1": "#FFFFFF", "--dsw-alias-bg-layer-2": "#FFFFFF", "--dsw-alias-bg-layer-3": "#FFFFFF", "--dsw-alias-bg-overlay": "#E9E2EE", "--dsw-specific-input-major": "#FFFFFF", "--dsw-specific-sidebar-fill": "#F2EDF5", "--dsw-specific-sidebar-nav-item-active": "#EDE5F2", "--dsw-specific-sidebar-nav-item-active-accent": "#E2D6EC", "--dsw-specific-bubble": "#F2EAF6", "--dsw-specific-bubble-highlight": "#E5D8EE", "--dsw-specific-selector": "#F5EFF7", "--dsw-specific-tip": "#F8F3FA", "--dsw-alias-border-l1": "rgba(50,30,60,.07)", "--dsw-alias-border-l2": "rgba(50,30,60,.12)", "--dsw-alias-border-l3": "rgba(50,30,60,.16)", "--dsw-alias-border-l4": "rgba(50,30,60,.22)", "--dsw-alias-label-primary": "#1A1620", "--dsw-alias-label-secondary": "#514859", "--dsw-alias-label-tertiary": "#63596C", "--dsw-alias-label-caption": "#736880", "--dsw-alias-markdown-placeholder": "#63596C", "--dsw-alias-brand-primary": "#211A28", "--dsw-alias-brand-text": "#211A28", "--dsw-alias-button-primary-fill": "#211A28", "--dsw-alias-button-primary-hover": "#352B3D", "--dsw-alias-button-contrast-fill": "#514859", "--dsw-alias-state-idle-primary": "#D3C6DA", "--dsw-alias-interactive-bg-hover": "rgba(50,30,60,.055)", "--dsw-alias-interactive-bg-active": "rgba(50,30,60,.09)", "--dsw-alias-interactive-bg-hover-solid": "#EDE5F2", "--dsw-alias-markdown-code-block": "#F7F3F9", "--dsw-alias-markdown-code-block-banner": "#F2ECF5", "--dsw-alias-markdown-inline-code": "#F5EFF8", "--dsw-alias-markdown-tag": "#EFE7F3", "--dsw-alias-markdown-citation": "#EAE1EF", "--dsw-alias-link": "#654A7A", "--dsw-alias-state-business-primary": "#654A7A", "--dsw-alias-state-business-tertiary": "#EAE1F1", "--dsw-alias-scrollbar-bg-l1": "#DED4E4", "--dsw-alias-scrollbar-hover-l1": "#CFC2D6", "--dsw-alias-menu-group-header-fill": "rgba(255,255,255,.94)"}, "darkTokens": {"--dsw-alias-bg-base": "#14121A", "--dsw-alias-bg-layer-1": "#211D28", "--dsw-alias-bg-layer-2": "#272231", "--dsw-alias-bg-layer-3": "#2E2838", "--dsw-alias-bg-overlay": "#2C2736", "--dsw-specific-input-major": "#211D28", "--dsw-specific-sidebar-fill": "#1A1721", "--dsw-specific-sidebar-nav-item-active": "#252030", "--dsw-specific-sidebar-nav-item-active-accent": "#2F283B", "--dsw-specific-bubble": "#221C2A", "--dsw-specific-bubble-highlight": "#2B2434", "--dsw-specific-selector": "#18141F", "--dsw-specific-tip": "#1D1825", "--dsw-alias-border-l1": "rgba(235,220,250,.10)", "--dsw-alias-border-l2": "rgba(235,220,250,.15)", "--dsw-alias-border-l3": "rgba(235,220,250,.19)", "--dsw-alias-border-l4": "rgba(235,220,250,.25)", "--dsw-alias-label-primary": "#EFEAF5", "--dsw-alias-label-secondary": "#C3BACC", "--dsw-alias-label-tertiary": "#A69BB2", "--dsw-alias-label-caption": "#8F849B", "--dsw-alias-markdown-placeholder": "#A69BB2", "--dsw-alias-brand-primary": "#EEE7F4", "--dsw-alias-brand-text": "#EEE7F4", "--dsw-alias-button-primary-fill": "#EEE7F4", "--dsw-alias-button-primary-hover": "#FBF6FF", "--dsw-alias-button-contrast-fill": "#C3BACC", "--dsw-alias-state-idle-primary": "#453F4E", "--dsw-alias-interactive-bg-hover": "rgba(235,220,250,.07)", "--dsw-alias-interactive-bg-active": "rgba(235,220,250,.12)", "--dsw-alias-interactive-bg-hover-solid": "#252030", "--dsw-alias-markdown-code-block": "#161219", "--dsw-alias-markdown-code-block-banner": "#1D1825", "--dsw-alias-markdown-inline-code": "#191420", "--dsw-alias-markdown-tag": "#292035", "--dsw-alias-markdown-citation": "#2C2736", "--dsw-alias-link": "#C0A6D6", "--dsw-alias-state-business-primary": "#C0A6D6", "--dsw-alias-state-business-tertiary": "#292035", "--dsw-alias-scrollbar-bg-l1": "#3A3345", "--dsw-alias-scrollbar-hover-l1": "#493F55", "--dsw-alias-menu-group-header-fill": "rgba(39,34,49,.94)"}, "ratios": {"ink": 16.9, "sec": 8.2, "ter": 6.3, "cap": 4.9, "accent": 7.1, "brand": 16.9}, "darkRatios": {"ink": 15.7, "sec": 9.9, "ter": 7.0, "cap": 5.3, "accent": 8.5, "brand": 15.6}}, "celadon": {"order": 5, "name": "青瓷", "en": "Celadon", "idea": "极淡的青瓷底，深青做强调。比苔绿冷、比雾蓝绿，是五套里最安静的一套。", "base": "#F4F8F6", "sidebar": "#EAF2EE", "surface": "#FFFFFF", "bubble": "#E3F0EB", "accent": "#14695F", "ink": "#101A16", "code": "#F1F6F4", "dark": {"base": "#0E1513", "sidebar": "#131B18", "surface": "#19231F", "bubble": "#17251F", "accent": "#7FD0C0", "ink": "#E5F0EB", "code": "#101715"}, "tokens": {"--dsw-alias-bg-base": "#F4F8F6", "--dsw-alias-bg-layer-1": "#FFFFFF", "--dsw-alias-bg-layer-2": "#FFFFFF", "--dsw-alias-bg-layer-3": "#FFFFFF", "--dsw-alias-bg-overlay": "#DFEAE5", "--dsw-specific-input-major": "#FFFFFF", "--dsw-specific-sidebar-fill": "#EAF2EE", "--dsw-specific-sidebar-nav-item-active": "#E2EEE9", "--dsw-specific-sidebar-nav-item-active-accent": "#D2E7DF", "--dsw-specific-bubble": "#E3F0EB", "--dsw-specific-bubble-highlight": "#D3E8E1", "--dsw-specific-selector": "#ECF3F0", "--dsw-specific-tip": "#F0F7F4", "--dsw-alias-border-l1": "rgba(15,45,35,.07)", "--dsw-alias-border-l2": "rgba(15,45,35,.12)", "--dsw-alias-border-l3": "rgba(15,45,35,.16)", "--dsw-alias-border-l4": "rgba(15,45,35,.22)", "--dsw-alias-label-primary": "#101A16", "--dsw-alias-label-secondary": "#46554E", "--dsw-alias-label-tertiary": "#586760", "--dsw-alias-label-caption": "#61716A", "--dsw-alias-markdown-placeholder": "#586760", "--dsw-alias-brand-primary": "#14201C", "--dsw-alias-brand-text": "#14201C", "--dsw-alias-button-primary-fill": "#14201C", "--dsw-alias-button-primary-hover": "#263530", "--dsw-alias-button-contrast-fill": "#46554E", "--dsw-alias-state-idle-primary": "#C3D2CB", "--dsw-alias-interactive-bg-hover": "rgba(15,45,35,.055)", "--dsw-alias-interactive-bg-active": "rgba(15,45,35,.09)", "--dsw-alias-interactive-bg-hover-solid": "#E2EEE9", "--dsw-alias-markdown-code-block": "#F1F6F4", "--dsw-alias-markdown-code-block-banner": "#EBF2EF", "--dsw-alias-markdown-inline-code": "#EFF5F2", "--dsw-alias-markdown-tag": "#E7F0EC", "--dsw-alias-markdown-citation": "#E0ECE7", "--dsw-alias-link": "#14695F", "--dsw-alias-state-business-primary": "#14695F", "--dsw-alias-state-business-tertiary": "#DDEDE8", "--dsw-alias-scrollbar-bg-l1": "#D5E2DC", "--dsw-alias-scrollbar-hover-l1": "#C3D5CD", "--dsw-alias-menu-group-header-fill": "rgba(255,255,255,.94)"}, "darkTokens": {"--dsw-alias-bg-base": "#0E1513", "--dsw-alias-bg-layer-1": "#19231F", "--dsw-alias-bg-layer-2": "#1F2A25", "--dsw-alias-bg-layer-3": "#26332E", "--dsw-alias-bg-overlay": "#22302B", "--dsw-specific-input-major": "#19231F", "--dsw-specific-sidebar-fill": "#131B18", "--dsw-specific-sidebar-nav-item-active": "#1C2A26", "--dsw-specific-sidebar-nav-item-active-accent": "#243530", "--dsw-specific-bubble": "#17251F", "--dsw-specific-bubble-highlight": "#1F2F29", "--dsw-specific-selector": "#121A17", "--dsw-specific-tip": "#16201C", "--dsw-alias-border-l1": "rgba(210,245,235,.10)", "--dsw-alias-border-l2": "rgba(210,245,235,.15)", "--dsw-alias-border-l3": "rgba(210,245,235,.19)", "--dsw-alias-border-l4": "rgba(210,245,235,.25)", "--dsw-alias-label-primary": "#E5F0EB", "--dsw-alias-label-secondary": "#B0C4BC", "--dsw-alias-label-tertiary": "#91A79E", "--dsw-alias-label-caption": "#7C938A", "--dsw-alias-markdown-placeholder": "#91A79E", "--dsw-alias-brand-primary": "#E3F1EC", "--dsw-alias-brand-text": "#E3F1EC", "--dsw-alias-button-primary-fill": "#E3F1EC", "--dsw-alias-button-primary-hover": "#F5FFFB", "--dsw-alias-button-contrast-fill": "#B0C4BC", "--dsw-alias-state-idle-primary": "#3B4B45", "--dsw-alias-interactive-bg-hover": "rgba(210,245,235,.07)", "--dsw-alias-interactive-bg-active": "rgba(210,245,235,.12)", "--dsw-alias-interactive-bg-hover-solid": "#1C2A26", "--dsw-alias-markdown-code-block": "#101715", "--dsw-alias-markdown-code-block-banner": "#16201C", "--dsw-alias-markdown-inline-code": "#131B18", "--dsw-alias-markdown-tag": "#16231F", "--dsw-alias-markdown-citation": "#22302B", "--dsw-alias-link": "#7FD0C0", "--dsw-alias-state-business-primary": "#7FD0C0", "--dsw-alias-state-business-tertiary": "#16231F", "--dsw-alias-scrollbar-bg-l1": "#2B3833", "--dsw-alias-scrollbar-hover-l1": "#384741", "--dsw-alias-menu-group-header-fill": "rgba(31,42,37,.94)"}, "ratios": {"ink": 16.6, "sec": 7.3, "ter": 5.6, "cap": 4.8, "accent": 6.1, "brand": 16.8}, "darkRatios": {"ink": 15.9, "sec": 10.1, "ter": 7.2, "cap": 5.6, "accent": 10.3, "brand": 16.3}}};
+const ORDER = Object.keys(P).sort((a, b) => P[a].order - P[b].order);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+let current = ORDER[0];
+let mode = 'light';
+
+const colorsOf = (p) => (mode === 'dark' ? p.dark : p);
+const tokensOf = (p) => (mode === 'dark' ? p.darkTokens : p.tokens);
+const ratiosOf = (p) => (mode === 'dark' ? p.darkRatios : p.ratios);
+
+function fmtCheck(ratio) { return ratio.toFixed(1) + ':1'; }
+
+function renderSpec() {
+  const p = P[current], c = colorsOf(p), t = tokensOf(p), r = ratiosOf(p);
+  const rows = [
+    ['画布', '--dsw-alias-bg-base', c.base, ''],
+    ['侧栏', '--dsw-specific-sidebar-fill', c.sidebar, ''],
+    ['用户气泡', '--dsw-specific-bubble', c.bubble, ''],
+    ['强调 / 链接', '--dsw-alias-state-business-primary', c.accent, ''],
+    ['正文', '--dsw-alias-label-primary', c.ink, fmtCheck(r.ink)],
+    ['次要文字', '--dsw-alias-label-secondary', t['--dsw-alias-label-secondary'], fmtCheck(r.sec)],
+    ['说明文字', '--dsw-alias-label-caption', t['--dsw-alias-label-caption'], fmtCheck(r.cap)],
+    ['代码块', '--dsw-alias-markdown-code-block', c.code, ''],
+  ];
+  document.getElementById('spec-rows').innerHTML = rows.map(([label, token, value, ratio]) => {
+    const swatch = /^#[0-9a-f]{6}$/i.test(value) ? '<span class="swv" style="background:' + value + '"></span>' : '';
+    return '<tr><td>' + label + '</td><td>' + token + '</td><td class="r">' + (ratio || swatch + value) + '</td></tr>';
+  }).join('');
+}
+
+function renderCaption() {
+  const p = P[current], c = colorsOf(p);
+  document.getElementById('cap-name').textContent = p.name;
+  document.getElementById('cap-en').textContent = p.en;
+  document.getElementById('cap-idea').textContent = p.idea;
+  [['base', c.base], ['side', c.sidebar], ['bubble', c.bubble], ['accent', c.accent]].forEach(([k, v]) => {
+    document.getElementById('v-' + k).style.background = v;
+    document.getElementById('h-' + k).textContent = v.toUpperCase();
+  });
+}
+
+function renderCode() {
+  const t = tokensOf(P[current]);
+  $$('[data-token]').forEach((el) => { el.textContent = t[el.dataset.token]; });
+  document.getElementById('code-sel').textContent = '[data-scheme="' + current + '"]';
+}
+
+function renderAll() { renderCaption(); renderCode(); renderSpec(); }
+
+function pushHash() {
+  try {
+    history.replaceState(null, '', '#' + current + (mode === 'dark' ? ':dark' : ''));
+  } catch (e) { /* file:// 下不允许改 history */ }
+}
+
+function setScheme(id, push) {
+  if (!P[id]) return;
+  current = id;
+  $$('.live').forEach((el) => { el.dataset.scheme = id; });
+  $$('[data-pick]').forEach((el) => { el.setAttribute('aria-pressed', String(el.dataset.pick === id)); });
+  renderAll();
+  if (push) pushHash();
+}
+
+function setMode(next, push) {
+  mode = next === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.mode = mode;
+  $$('.live').forEach((el) => { el.dataset.mode = mode; });
+  $$('.mini').forEach((el) => { el.dataset.mode = mode; });
+  $$('[data-mode-pick]').forEach((el) => { el.setAttribute('aria-pressed', String(el.dataset.modePick === mode)); });
+  $$('[data-appearance]').forEach((el) => { el.setAttribute('aria-pressed', String(el.dataset.appearance === mode)); });
+  document.getElementById('cap-mode').textContent = mode === 'dark' ? '深色' : '浅色';
+  renderAll();
+  if (push) pushHash();
+}
+
+document.addEventListener('click', (e) => {
+  const modeBtn = e.target.closest('[data-mode-pick]');
+  if (modeBtn) { setMode(modeBtn.dataset.modePick, true); return; }
+  const appearance = e.target.closest('[data-appearance]');
+  if (appearance && appearance.dataset.appearance !== 'system') { setMode(appearance.dataset.appearance, true); return; }
+  const btn = e.target.closest('[data-pick]');
+  if (!btn) return;
+  setScheme(btn.dataset.pick, true);
+  btn.focus({ preventScroll: true });
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || e.target.matches('input,textarea')) return;
+  if (e.key === 'd' || e.key === 'D') { setMode(mode === 'dark' ? 'light' : 'dark', true); return; }
+  const i = Number(e.key);
+  if (i >= 1 && i <= ORDER.length) setScheme(ORDER[i - 1], true);
+});
+
+const fromHash = location.hash.slice(1);
+const [hashScheme, hashMode] = fromHash.split(':');
+setMode(hashMode === 'dark' ? 'dark' : 'light', false);
+setScheme(P[hashScheme] ? hashScheme : ORDER[0], false);
+</script>
+</body>
+</html>

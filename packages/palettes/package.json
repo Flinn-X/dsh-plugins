@@ -1,0 +1,60 @@
+{
+  "name": "dsh-palettes",
+  "version": "1.2.0",
+  "description": "Five palettes for the DSH web client — Paper, Mist, Moss, Iris, and Celadon — each with a light and a dark version, switchable in Settings → General.",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "Flinn",
+    "url": "https://github.com/Flinn-X"
+  },
+  "homepage": "https://github.com/Flinn-X/dsh-plugins/tree/main/packages/palettes#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Flinn-X/dsh-plugins.git",
+    "directory": "packages/palettes"
+  },
+  "bugs": {
+    "url": "https://github.com/Flinn-X/dsh-plugins/issues"
+  },
+  "keywords": [
+    "deepseek",
+    "harness",
+    "dsh",
+    "dsh-plugin",
+    "palette",
+    "theme",
+    "dark-mode"
+  ],
+  "engines": {
+    "dsh": ">=0.2.2-rc.1 <0.3.0-0"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-theme",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  }
+}

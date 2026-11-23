@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>DSH 浅色配色 · 五套方案预览</title>
+<style>
+  /* ---------- 页面骨架（中性，不与方案争夺注意力） ---------- */
+  :root{
+    --page-bg:#F1F1EF; --ink:#191A1C; --mute:#5F6165; --faint:#6A6C70;
+    --rule:rgba(25,26,28,.14); --rule-soft:rgba(25,26,28,.08);
+    --mono:ui-monospace,SFMono-Regular,"Cascadia Mono",Consolas,"Liberation Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--page-bg);color:var(--ink);font:13.5px/1.6 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  ::selection{background:rgba(25,26,28,.14)}
+  button{font:inherit;color:inherit}
+  .wrap{max-width:1360px;margin:0 auto;padding:38px 48px 96px}
+
+  /* ---------- 页头 ---------- */
+  .mast{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;border-bottom:1px solid var(--rule);padding-bottom:20px}
+  .mast h1{margin:0;font-size:25px;font-weight:600;letter-spacing:-.022em;line-height:1.25}
+  .mast .lede{margin:8px 0 0;max-width:720px;color:var(--mute);font-size:13px}
+  .mast .lede b{color:var(--ink);font-weight:500}
+  .meta{flex:0 0 auto;text-align:right;font:10.5px/1.7 var(--mono);color:var(--faint);letter-spacing:.02em}
+  .meta strong{display:block;color:var(--ink);font-weight:500;font-size:11px}
+
+  /* ---------- 主舞台：方案索引 + 窗口 ---------- */
+  .stage{margin-top:30px}
+  .tabbar{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;border-bottom:1px solid var(--rule);margin-bottom:18px}
+  .tabs{display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;min-width:0}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabtools{display:flex;align-items:center;gap:14px;padding-bottom:11px;flex:0 0 auto}
+  .tabhint{font:10px var(--mono);color:var(--faint)}
+  .modes{display:inline-flex;background:rgba(25,26,28,.07);border-radius:8px;padding:2px}
+  .modes button{border:0;background:none;color:var(--mute);font-size:11.5px;line-height:1;padding:5px 11px;border-radius:6px;cursor:pointer}
+  .modes button[aria-pressed="true"]{background:var(--ink);color:#F4F3F0}
+  .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .tab{position:relative;flex:0 0 auto;display:flex;align-items:center;gap:9px;padding:0 19px 13px;border:0;background:none;cursor:pointer;white-space:nowrap}
+  .tab:hover .nm{color:#000}
+  .tab .strip{display:flex;gap:2px}
+  .tab .strip i{width:9px;height:15px;border-radius:2px;display:block;background:var(--sw-base,#ccc);box-shadow:inset 0 0 0 1px rgba(25,26,28,.16)}
+  .tab .strip i:nth-child(2){background:var(--sw-side,#ddd)}
+  .tab .strip i:nth-child(3){background:var(--sw-bubble,#e5e5e5)}
+  .tab .strip i:nth-child(4){background:var(--sw-accent,#999)}
+  .tab .nm{font-size:13.5px;font-weight:500;letter-spacing:-.01em}
+  .tab .en{font:10.5px var(--mono);color:var(--faint)}
+  .tab[aria-pressed="true"] .nm{font-weight:600}
+  .tab[aria-pressed="true"]::after{content:"";position:absolute;left:19px;right:19px;bottom:-1px;height:2px;background:var(--ink)}
+
+
+  /* ---------- 应用窗口 ---------- */
+  .win{height:722px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid rgba(23,24,26,.12);
+       box-shadow:0 26px 64px -30px rgba(23,24,26,.5),0 2px 6px rgba(23,24,26,.05);
+       background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);
+       font-family:var(--sans);font-size:13px;line-height:1.5}
+  .win .tb{flex:0 0 34px;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--dsw-specific-sidebar-fill);border-bottom:1px solid var(--dsw-alias-border-l1)}
+  .win .tb .mark{width:18px;height:18px;border-radius:5px;background:var(--dsw-alias-label-primary);display:grid;place-items:center;gap:2px;padding:4px 3px}
+  .win .tb .mark i{display:block;height:1.5px;background:var(--dsw-alias-label-primary-foreground);border-radius:1px}
+  .win .tb .mark i:nth-child(1){width:9px}.win .tb .mark i:nth-child(2){width:6px}.win .tb .mark i:nth-child(3){width:9px}
+  .win .tb .t{font-size:11px;color:var(--dsw-alias-label-tertiary);margin:0 auto;letter-spacing:.01em}
+  .win .tb .wc{display:flex;gap:2px}
+  .win .tb .wc span{width:40px;height:26px;display:grid;place-items:center;border-radius:5px;color:var(--dsw-alias-label-tertiary)}
+  .win .tb .wc span:hover{background:var(--dsw-alias-interactive-bg-hover)}
+  .win .tb .wc svg{width:9px;height:9px}
+  .body{flex:1;display:flex;min-height:0}
+
+  /* 侧栏 */
+  .side{flex:0 0 268px;display:flex;flex-direction:column;background:var(--dsw-specific-sidebar-fill);border-right:1px solid var(--dsw-alias-border-l3);padding:6px 8px 8px}
+  .side .brand{display:flex;align-items:center;gap:8px;padding:8px 7px 12px}
+  .side .brand .sign{width:19px;height:19px;border-radius:5px;background:var(--dsw-alias-label-primary);display:grid;gap:2px;padding:5px 3px}
+  .side .brand .sign i{display:block;height:1.5px;background:var(--dsw-alias-label-primary-foreground);border-radius:1px}
+  .side .brand .sign i:nth-child(1){width:11px}.side .brand .sign i:nth-child(2){width:7px}.side .brand .sign i:nth-child(3){width:11px}
+  .side .brand b{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+  .side .brand .chev{margin-left:auto;color:var(--dsw-alias-label-caption)}
+  .side .sec{display:flex;align-items:center;justify-content:space-between;padding:8px 7px 4px;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--dsw-alias-label-tertiary)}
+  .side .sec .add{width:20px;height:20px;display:grid;place-items:center;border-radius:5px;color:var(--dsw-alias-label-tertiary)}
+  .side .grp{display:flex;align-items:center;gap:5px;padding:6px 7px 3px;font-size:10.5px;color:var(--dsw-alias-label-caption)}
+  .side .row{display:flex;align-items:center;gap:7px;height:30px;padding:0 8px;border-radius:7px;font-size:12.5px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden}
+  .side .row:hover{background:var(--dsw-alias-interactive-bg-hover)}
+  .side .row[aria-current]{background:var(--dsw-specific-sidebar-nav-item-active);color:var(--dsw-alias-label-primary);font-weight:500}
+  .side .row time{margin-left:auto;font-size:10px;color:var(--dsw-alias-label-caption);font-variant-numeric:tabular-nums}
+  .side .row .sl{display:block;overflow:hidden;text-overflow:ellipsis}
+  .side .foot{margin-top:auto;border-top:1px solid var(--dsw-alias-border-l1);padding-top:6px}
+  .side .foot .row{color:var(--dsw-alias-label-secondary);font-size:12px}
+
+  /* 主区 */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--dsw-alias-bg-base)}
+  .chead{flex:0 0 44px;display:flex;align-items:center;padding:0 24px}
+  .chead-in{width:100%;max-width:748px;margin:0 auto;display:flex;align-items:center;gap:8px}
+  .chead .title{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+  .chead .acts{margin-left:auto;display:flex;gap:1px;color:var(--dsw-alias-label-tertiary)}
+  .chead .acts span{width:26px;height:26px;border-radius:6px;display:grid;place-items:center}
+  .chead .acts span:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}
+  .chead svg{width:14px;height:14px}
+  .scroll{flex:1;min-height:0;overflow:hidden;padding:0 24px}
+  .thread{max-width:748px;margin:0 auto;padding:18px 0 0;display:flex;flex-direction:column;gap:26px}
+
+  .urow{display:flex;justify-content:flex-end}
+  .bubble{max-width:70.2%;padding:10px 16px;border-radius:18px;background:var(--dsw-specific-bubble);color:var(--dsw-alias-label-primary);font-size:13.5px;line-height:22px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .arow{display:flex;flex-direction:column;gap:9px}
+  .arow p{margin:0;font-size:13.5px;line-height:22px;color:var(--dsw-alias-label-primary)}
+  .arow p.dim{color:var(--dsw-alias-label-secondary)}
+  .arow .lnk{color:var(--dsw-alias-link);text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(20,22,25,.28)}
+
+  .tool{border:1px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-alias-bg-layer-1);overflow:hidden}
+  .tool .th{display:flex;align-items:center;gap:8px;height:34px;padding:0 11px;font-size:12px}
+  .tool .dot{width:6px;height:6px;border-radius:50%;background:var(--dsw-alias-state-success-primary);flex:0 0 auto}
+  .tool .tn{font-weight:500}
+  .tool .tm{color:var(--dsw-alias-label-tertiary);font-size:11.5px;font-variant-numeric:tabular-nums}
+  .tool .tc{margin-left:auto;color:var(--dsw-alias-label-caption);display:grid;place-items:center}
+  .tool svg{width:12px;height:12px}
+
+  .code{border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-markdown-code-block);overflow:hidden}
+  .code .ch{display:flex;align-items:center;height:30px;padding:0 11px;border-bottom:1px solid var(--dsw-alias-border-l1);font:10.5px var(--mono);color:var(--dsw-alias-label-tertiary)}
+  .code .ch .cp{margin-left:auto;display:flex;align-items:center;gap:4px;font:10.5px var(--mono)}
+  .code .ch svg{width:11px;height:11px}
+  .code pre{margin:0;padding:10px 13px;font:11.5px/19px var(--mono);color:var(--dsw-alias-label-primary);overflow:hidden}
+  .code .k{color:var(--dsw-alias-label-tertiary)}
+  .code .v{color:var(--dsw-alias-label-primary)}
+  .code .sel{color:var(--dsw-alias-state-business-primary)}
+
+  .composer{flex:0 0 auto;padding:10px 24px 18px}
+  .ccard{max-width:748px;margin:0 auto;background:var(--dsw-specific-input-major);border:1px solid var(--dsw-alias-border-l2);border-radius:20px;padding:12px 14px 10px;box-shadow:0 10px 30px -22px rgba(20,22,25,.45)}
+  .ccard .ph{font-size:13.5px;line-height:20px;color:var(--dsw-alias-markdown-placeholder);padding:1px 2px 15px}
+  .ccard .tools{display:flex;align-items:center;gap:4px}
+  .ccard .tools .chip{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--dsw-alias-label-secondary);padding:3px 7px;border-radius:6px}
+  .ccard .tools .chip:hover{background:var(--dsw-alias-interactive-bg-hover)}
+  .ccard .tools .ic{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;color:var(--dsw-alias-label-tertiary)}
+  .ccard .tools .ic:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}
+  .ccard svg{width:14px;height:14px}
+  .ccard .send{margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-label-primary-foreground);display:grid;place-items:center}
+  .ccard .send svg{width:13px;height:13px}
+
+  /* 窗口下方说明 */
+  .cap{display:flex;align-items:flex-start;justify-content:space-between;gap:36px;margin-top:22px}
+  .cap h2{margin:0;font-size:16px;font-weight:600;letter-spacing:-.015em}
+  .cap h2 .en{font:10.5px var(--mono);color:var(--faint);font-weight:400;letter-spacing:.02em;margin-left:7px}
+  .cap h2 .mode-tag{display:inline-flex;align-items:center;height:18px;margin-left:8px;padding:0 6px;border:1px solid var(--rule);border-radius:5px;font:10px var(--mono);font-weight:400;color:var(--mute);letter-spacing:.02em;vertical-align:2px}
+  .cap .idea{margin:6px 0 0;max-width:600px;color:var(--mute);font-size:12.5px;line-height:1.75}
+  .cap .vals{display:flex;gap:14px;flex:0 0 auto;padding-top:3px}
+  .cap .vals figure{margin:0;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+  .cap .vals i{display:block;width:44px;height:14px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.34)}
+  .cap .vals figcaption{font:10px var(--mono);color:var(--mute);letter-spacing:.01em}
+
+  /* ---------- 区块 ---------- */
+  .sec{margin-top:56px;border-top:1px solid var(--rule);padding-top:15px}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:18px}
+  .sec-head h2{margin:0;font-size:12.5px;font-weight:600;letter-spacing:.02em;color:#3B3D41}
+  .sec-head p{margin:0;font-size:11.5px;color:var(--faint)}
+  .sec-head code{font:10.5px var(--mono);color:var(--mute);background:rgba(25,26,28,.045);padding:1px 5px;border-radius:4px}
+
+  /* 设置面板 */
+  .setwin{display:flex;height:356px;border-radius:14px;overflow:hidden;border:1px solid rgba(23,24,26,.12);box-shadow:0 20px 48px -32px rgba(23,24,26,.45);
+          background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-family:var(--sans)}
+  .win[data-mode="dark"]{border-color:rgba(0,0,0,.5);box-shadow:0 30px 72px -34px rgba(0,0,0,.72),0 2px 8px rgba(0,0,0,.3)}
+  .setwin[data-mode="dark"]{border-color:rgba(0,0,0,.5);box-shadow:0 24px 56px -34px rgba(0,0,0,.68)}
+  .setnav{flex:0 0 188px;background:var(--dsw-specific-sidebar-fill);border-right:1px solid var(--dsw-alias-border-l2);padding:16px 9px}
+  .setnav .nt{font-size:13px;font-weight:600;padding:0 8px 12px;letter-spacing:-.01em}
+  .setnav a{display:flex;align-items:center;height:28px;padding:0 8px;border-radius:6px;font-size:12.5px;color:var(--dsw-alias-label-secondary);text-decoration:none}
+  .setnav a[aria-current]{background:var(--dsw-specific-sidebar-nav-item-active);color:var(--dsw-alias-label-primary);font-weight:500}
+  .setbody{flex:1;min-width:0;padding:20px 26px;overflow:hidden}
+  .setbody h3{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em}
+  .setrows{margin-top:6px}
+  .setrow{display:flex;align-items:center;gap:40px;padding:14px 0;border-top:1px solid var(--dsw-alias-border-l1)}
+  .setrow:first-child{border-top:0}
+  .setrow .lb{flex:1;min-width:0}
+  .setrow .lb b{display:block;font-size:12.5px;font-weight:500;line-height:1.5}
+  .setrow .lb span{display:block;margin-top:2px;font-size:11px;line-height:1.55;color:var(--dsw-alias-label-tertiary)}
+  .setrow .ctl{flex:0 0 auto;display:flex;align-items:center;gap:10px}
+  .seg{display:inline-flex;background:var(--dsw-specific-selector);border-radius:8px;padding:2px}
+  .seg span{font-size:11.5px;line-height:1;padding:5px 11px;border-radius:6px;color:var(--dsw-alias-label-secondary);white-space:nowrap}
+  .seg span[aria-pressed="true"]{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);box-shadow:0 1px 2px rgba(20,20,20,.1)}
+  .pal{display:flex;gap:8px}
+  .pal button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;border:0;background:none;cursor:pointer;border-radius:8px}
+  .pal .chip{position:relative;width:52px;height:30px;border-radius:6px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(20,20,20,.14);
+             background:linear-gradient(90deg,var(--sw-base,#ccc) 0 33.4%,var(--sw-side,#ddd) 33.4% 66.7%,var(--sw-bubble,#eee) 66.7% 100%)}
+  .pal .chip::after{content:"";position:absolute;inset:auto 0 0 0;height:3px;background:var(--sw-accent,#777)}
+  .pal button span{font-size:10px;line-height:1.2;color:var(--dsw-alias-label-tertiary);white-space:nowrap}
+  .pal button[aria-pressed="true"] .chip{box-shadow:inset 0 0 0 2px var(--dsw-alias-label-primary)}
+  .pal button[aria-pressed="true"] span{color:var(--dsw-alias-label-primary);font-weight:500}
+  .stepper{display:inline-flex;align-items:center;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;overflow:hidden}
+  .stepper b{font:11.5px var(--mono);font-weight:500;padding:0 11px;line-height:26px;font-variant-numeric:tabular-nums}
+  .stepper i{width:26px;line-height:26px;text-align:center;border-left:1px solid var(--dsw-alias-border-l1);color:var(--dsw-alias-label-secondary);font-style:normal}
+  .setnote{margin-top:14px;font-size:11px;color:var(--dsw-alias-label-caption);display:flex;align-items:center;gap:6px}
+  .setnote::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--dsw-alias-state-business-primary);flex:0 0 auto}
+
+  /* 并排对比 */
+  .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+  .mini{display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:none;cursor:pointer;text-align:left;border-radius:10px}
+  .mini .frame{height:142px;border-radius:9px;overflow:hidden;border:1px solid rgba(23,24,26,.14);background:var(--dsw-alias-bg-base);display:flex;box-shadow:0 1px 2px rgba(23,24,26,.04)}
+  .mini[aria-pressed="true"] .frame{box-shadow:0 0 0 2px var(--ink);border-color:transparent}
+  .mini .mside{flex:0 0 27%;background:var(--dsw-specific-sidebar-fill);border-right:1px solid var(--dsw-alias-border-l1);padding:9px 7px;display:flex;flex-direction:column;gap:5px}
+  .mini .mside i{display:block;height:3px;border-radius:2px;background:var(--dsw-alias-border-l4)}
+  .mini .mside i:nth-child(2){background:var(--dsw-specific-sidebar-nav-item-active);height:10px;border-radius:3px;margin-top:4px}
+  .mini .mmain{flex:1;min-width:0;padding:9px 8px;display:flex;flex-direction:column;gap:5px}
+  .mini .mb{height:19px;border-radius:6px;background:var(--dsw-specific-bubble);width:72%;margin-left:auto}
+  .mini .ml{height:3px;border-radius:2px;background:var(--dsw-alias-border-l4)}
+  .mini .mc{height:22px;border-radius:4px;background:var(--dsw-alias-markdown-code-block);margin-top:2px}
+  .mini .mcomp{margin-top:auto;height:16px;border-radius:8px;background:var(--dsw-specific-input-major);box-shadow:inset 0 0 0 1px var(--dsw-alias-border-l2)}
+  .mini .lbl{display:flex;align-items:baseline;gap:6px;padding:0 1px}
+  .mini .lbl b{font-size:12px;font-weight:500}
+  .mini .lbl span{font:10px var(--mono);color:var(--faint)}
+  .mini[aria-pressed="true"] .lbl b{font-weight:600}
+
+  /* 约束与数值 */
+  .spec{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:52px;align-items:start}
+  .spec h3{margin:0 0 12px;font-size:12px;font-weight:600;letter-spacing:.02em;color:#3B3D41}
+  .spec ul{margin:0;padding:0;list-style:none}
+  .spec li{position:relative;padding:9px 0 9px 16px;border-top:1px solid var(--rule-soft);font-size:12px;line-height:1.75;color:var(--mute)}
+  .spec li:first-child{border-top:0}
+  .spec li::before{content:"";position:absolute;left:0;top:17px;width:5px;height:1px;background:#9A9C9F}
+  .spec li b{color:var(--ink);font-weight:500}
+  .spec li code{font:10.5px var(--mono);color:var(--ink)}
+  .tbl{width:100%;border-collapse:collapse;font-size:12px}
+  .tbl th{text-align:left;font:10px var(--mono);font-weight:400;letter-spacing:.04em;color:var(--mute);padding:0 0 8px;border-bottom:1px solid var(--rule)}
+  .tbl th.r,.tbl td.r{text-align:right}
+  .tbl td{padding:7px 0;border-bottom:1px solid var(--rule-soft);vertical-align:baseline}
+  .tbl td:first-child{color:var(--mute);width:34%}
+  .tbl td:nth-child(2){font:10.5px var(--mono);color:var(--faint);width:46%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tbl td.r{font:10.5px var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+  .tbl .swv{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.34)}
+
+  .foot{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;gap:24px;font:10.5px/1.7 var(--mono);color:var(--mute)}
+
+  /* 预览用的基础常量（真实运行由 DSH 基础样式表提供） */
+  .live{--dsw-alias-label-primary-foreground:#fff;--dsw-alias-state-success-primary:#22c55e;--dsw-alias-state-warn-primary:#f59e0b;--dsw-alias-state-error-primary:#ec1313}
+  .live[data-mode="dark"]{--dsw-alias-label-primary-foreground:#0f1115}
+
+  /* 交互 */
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:2px}
+  .live,.live *{transition:background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease}
+  .mini .frame,.sw,.pal button{transition:box-shadow .18s ease,background-color .18s ease}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (max-width:1180px){
+    .wrap{padding:28px 26px 72px}
+    .mast .lede{max-width:720px}
+    .stage{grid-template-columns:1fr;gap:26px}
+    .picker{position:static}
+    .picker .swrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 18px}
+    .sw{border-bottom:1px solid var(--rule-soft)}
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .spec{grid-template-columns:1fr;gap:34px}
+    .win{height:660px}
+    .side{flex-basis:230px}
+    .setwin{height:auto;min-height:312px}
+  }
+/*__PALETTE_CSS__*/
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <div>
+      <h1>DSH 配色方案</h1>
+      <p class="lede">五套方案都从 DSH 现在的单色骨架出发，只改四个地方：<b>画布的温度、侧栏的深浅、气泡的色相、强调色</b>。每套各有浅色与深色两版，正文对比度都在 15:1 以上，说明文字不低于 4.8:1。</p>
+    </div>
+    <div class="meta"><strong>5 套 × 2 模式</strong>2026.11 · 预览稿</div>
+  </header>
+
+  <section class="stage" aria-label="配色预览">
+    <div class="tabbar">
+      <div class="tabs" aria-label="配色方案">
+      <button class="tab" data-pick="paper" aria-pressed="true"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">纸白</span><span class="en">Paper</span></button>
+      <button class="tab" data-pick="mist" aria-pressed="false"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">雾蓝</span><span class="en">Mist</span></button>
+      <button class="tab" data-pick="moss" aria-pressed="false"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">苔绿</span><span class="en">Moss</span></button>
+      <button class="tab" data-pick="iris" aria-pressed="false"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">藕荷</span><span class="en">Iris</span></button>
+      <button class="tab" data-pick="celadon" aria-pressed="false"><span class="strip"><i></i><i></i><i></i><i></i></span><span class="nm">青瓷</span><span class="en">Celadon</span></button>
+      </div>
+      <div class="tabtools">
+        <span class="tabhint">1–5</span>
+        <div class="modes" role="group" aria-label="外观模式">
+          <button type="button" data-mode-pick="light" aria-pressed="true">浅色</button>
+          <button type="button" data-mode-pick="dark" aria-pressed="false">深色</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="win live" data-scheme="paper" data-mode="light" role="img" aria-label="DSH 聊天界面配色预览">
+        <div class="tb">
+          <div class="mark"><i></i><i></i><i></i></div>
+          <div class="t">DeepSeek Harness</div>
+          <div class="wc">
+            <span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 5h6"/></svg></span>
+            <span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2.2" y="2.2" width="5.6" height="5.6"/></svg></span>
+            <span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/></svg></span>
+          </div>
+        </div>
+        <div class="body">
+          <aside class="side">
+            <div class="brand">
+              <span class="sign"><i></i><i></i><i></i></span>
+              <b>DeepSeek Harness</b>
+              <svg class="chev" width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 4.5L6 7.5l3-3"/></svg>
+            </div>
+            <div class="sec"><span>工作区</span><span class="add"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 2v8M2 6h8"/></svg></span></div>
+            <div class="grp">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 3.5h3l1 1.2h5v4.8h-9z"/></svg>
+              <span>dsh-plugins / design</span>
+            </div>
+            <div class="row" aria-current="true"><span class="sl">配色方案预览</span><time>刚刚</time></div>
+            <div class="row"><span class="sl">消息折叠与回退按钮冲突</span></div>
+            <div class="row"><span class="sl">修复终端换行偏移</span></div>
+            <div class="row"><span class="sl">整理 Cordis 组合补丁</span></div>
+            <div class="row"><span class="sl">把工具卡片收成一行</span></div>
+            <div class="row"><span class="sl">远程会话的快捷入口</span></div>
+            <div class="foot">
+              <div class="row"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="2.1"/><path d="M8 1.7v1.7M8 12.6v1.7M1.7 8h1.7M12.6 8h1.7M3.55 3.55l1.2 1.2M11.25 11.25l1.2 1.2M12.45 3.55l-1.2 1.2M4.75 11.25l-1.2 1.2"/></svg><span class="sl">设置</span></div>
+            </div>
+          </aside>
+          <main class="main">
+            <div class="chead"><div class="chead-in">
+              <span class="title">配色方案预览</span>
+              <div class="acts">
+                <span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M5.2 8.8L9.4 4.6a2 2 0 112.8 2.8L8 11.6a3.2 3.2 0 11-4.5-4.5l4.1-4.1"/></svg></span>
+                <span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="3.2" cy="8" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="12.8" cy="8" r="1"/></svg></span>
+              </div>
+            </div></div>
+            <div class="scroll">
+              <div class="thread">
+                <div class="urow">
+                  <div class="bubble">给 DSH 做几套浅色配色，先在 HTML 里看看效果，选定后再做成插件。别影响文字的可读性。</div>
+                </div>
+                <div class="arow">
+                  <p>先做五版，只改画布、侧栏、气泡和强调色四个维度，其余沿用同一套 alias token，可对照 <a class="lnk" href="#" onclick="return false">token 表</a>。深色外观保持原样，切换入口放在「设置 → 通用」。</p>
+                  <p class="dim">每套都过一遍对比度：正文 15:1 以上，次要文字 6:1 以上，说明文字也不低于 4.5:1。</p>
+                </div>
+                <div class="tool">
+                  <div class="th">
+                    <span class="dot"></span><span class="tn">读取</span>
+                    <span class="tm">ui-theme/README.md · palettes.json</span>
+                    <span class="tc"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 4.5L6 7.5l3-3"/></svg></span>
+                  </div>
+                </div>
+                <div class="code">
+                  <div class="ch"><span>palettes.css</span><span class="cp"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1"><rect x="4" y="4" width="6" height="6" rx="1"/><path d="M8 4V2.6A.6.6 0 007.4 2H2.6a.6.6 0 00-.6.6v4.8c0 .33.27.6.6.6H4"/></svg>复制</span></div>
+                  <pre><span class="sel" id="code-sel">[data-scheme="paper"]</span> {
+  <span class="k">--dsw-alias-bg-base</span>: <span class="v" data-token="--dsw-alias-bg-base">#FCFAF6</span>;
+  <span class="k">--dsw-specific-sidebar-fill</span>: <span class="v" data-token="--dsw-specific-sidebar-fill">#F3EEE3</span>;
+  <span class="k">--dsw-specific-bubble</span>: <span class="v" data-token="--dsw-specific-bubble">#F4EEE1</span>;
+  <span class="k">--dsw-alias-state-business-primary</span>: <span class="v" data-token="--dsw-alias-state-business-primary">#3B4A66</span>;
+}</pre>
+                </div>
+                <div class="arow">
+                  <p>五套里挑一套就行，也可以指定「纸白 + 苔绿的强调色」这种组合。</p>
+                </div>
+              </div>
+            </div>
+            <div class="composer">
+              <div class="ccard">
+                <div class="ph">描述你想改的地方…</div>
+                <div class="tools">
+                  <span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M11.7 7.3l-4.2 4.2a3.1 3.1 0 11-4.4-4.4l4.6-4.6a2.1 2.1 0 113 3l-4.6 4.6a1.1 1.1 0 11-1.6-1.6l4.1-4.1"/></svg></span>
+                  <span class="chip">DeepSeek V4.1<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 4.5L6 7.5l3-3"/></svg></span>
+                  <span class="chip">标准</span>
+                  <span class="send"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 12.5v-9M3.6 7.9L8 3.5l4.4 4.4"/></svg></span>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+    </div>
+
+    <div class="cap">
+        <div>
+          <h2><span id="cap-name">纸白</span><span class="en" id="cap-en">Paper</span><span class="mode-tag" id="cap-mode">浅色</span></h2>
+          <p class="idea" id="cap-idea">暖纸色的底，配墨蓝的强调色。把长时间阅读的白底冷光收一点，气泡用米色，不抢正文。</p>
+        </div>
+        <div class="vals">
+          <figure><i id="v-base"></i><figcaption id="h-base">#FCFAF6</figcaption></figure>
+          <figure><i id="v-side"></i><figcaption id="h-side">#F3EEE3</figcaption></figure>
+          <figure><i id="v-bubble"></i><figcaption id="h-bubble">#F4EEE1</figcaption></figure>
+          <figure><i id="v-accent"></i><figcaption id="h-accent">#3B4A66</figcaption></figure>
+        </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <h2>设置 · 通用</h2>
+      <p>插件在 <code>appearance</code> 之后加一行「配色方案」，与外观、字号并列。</p>
+    </div>
+    <div class="setwin live" data-scheme="paper" data-mode="light">
+      <nav class="setnav">
+        <div class="nt">设置</div>
+        <a href="#" aria-current="true" onclick="return false">通用</a>
+        <a href="#" onclick="return false">模型</a>
+        <a href="#" onclick="return false">插件</a>
+        <a href="#" onclick="return false">快捷键</a>
+        <a href="#" onclick="return false">关于</a>
+      </nav>
+      <div class="setbody">
+        <h3>通用</h3>
+        <div class="setrows">
+          <div class="setrow">
+            <div class="lb"><b>外观</b><span>浅色、深色，或跟随系统。</span></div>
+            <div class="ctl"><div class="seg"><span data-appearance="light" aria-pressed="true">浅色</span><span data-appearance="dark" aria-pressed="false">深色</span><span data-appearance="system">跟随系统</span></div></div>
+          </div>
+          <div class="setrow">
+              <div class="lb"><b>配色方案</b><span>浅色与深色各一套；跟随外观自动切换。</span></div>
+            <div class="ctl">
+              <div class="pal">
+                <button data-pick="paper" aria-pressed="true"><span class="chip"></span><span>纸白</span></button>
+                <button data-pick="mist" aria-pressed="false"><span class="chip"></span><span>雾蓝</span></button>
+                <button data-pick="moss" aria-pressed="false"><span class="chip"></span><span>苔绿</span></button>
+                <button data-pick="iris" aria-pressed="false"><span class="chip"></span><span>藕荷</span></button>
+                <button data-pick="celadon" aria-pressed="false"><span class="chip"></span><span>青瓷</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="setrow">
+            <div class="lb"><b>字号</b><span>正文与对话的基础字号。</span></div>
+            <div class="ctl"><div class="stepper"><i>−</i><b>14</b><i>+</i></div></div>
+          </div>
+          <div class="setrow">
+            <div class="lb"><b>发送键</b><span>Enter 发送，Shift + Enter 换行。</span></div>
+            <div class="ctl"><div class="seg"><span aria-pressed="true">Enter</span><span>Ctrl + Enter</span></div></div>
+          </div>
+        </div>
+        <p class="setnote">配色切换即时生效，不改动外观与字号设置。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <h2>并排对比</h2>
+      <p>同一屏内容在五套配色下的整体观感。</p>
+    </div>
+    <div class="grid" id="grid">
+      <button class="mini" data-pick="paper" data-scheme="paper" data-mode="light" aria-pressed="true" aria-label="纸白">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>纸白</b><span>Paper</span></span>
+      </button>
+      <button class="mini" data-pick="mist" data-scheme="mist" data-mode="light" aria-pressed="false" aria-label="雾蓝">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>雾蓝</b><span>Mist</span></span>
+      </button>
+      <button class="mini" data-pick="moss" data-scheme="moss" data-mode="light" aria-pressed="false" aria-label="苔绿">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>苔绿</b><span>Moss</span></span>
+      </button>
+      <button class="mini" data-pick="iris" data-scheme="iris" data-mode="light" aria-pressed="false" aria-label="藕荷">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>藕荷</b><span>Iris</span></span>
+      </button>
+      <button class="mini" data-pick="celadon" data-scheme="celadon" data-mode="light" aria-pressed="false" aria-label="青瓷">
+        <span class="frame"><span class="mside"><i></i><i></i><i></i><i></i></span><span class="mmain"><span class="mb"></span><span class="ml" style="width:92%"></span><span class="ml" style="width:74%"></span><span class="mc"></span><span class="ml" style="width:84%"></span><span class="ml" style="width:58%"></span><span class="mcomp"></span></span></span>
+        <span class="lbl"><b>青瓷</b><span>Celadon</span></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="sec spec">
+    <div>
+      <h3>约束</h3>
+      <ul>
+        <li><b>文字对比度</b>：正文浅色 <code>16.3–17.0:1</code>、深色 <code>15.6–16.1:1</code>；次要 <code>≥6.8:1</code>；说明文字 <code>≥4.8:1</code>；气泡里的正文 <code>≥13.5:1</code>。</li>
+        <li><b>气泡与画布</b>：明度差浅色 <code>3.3–4.2 L*</code>、深色 <code>5.6–7.6 L*</code>，一眼能分出消息与底，又不喧宾夺主。</li>
+        <li><b>强调色</b>：只用于链接、选中行、焦点环与代码里的关键行；成功 / 警告 / 错误沿用 DSH 语义色，不跟着方案走。</li>
+        <li><b>结构</b>：边框仍是 <code>7%–25%</code> 的四级 hairline，圆角、字号、间距一律不动。</li>
+      </ul>
+    </div>
+    <div>
+      <h3>当前方案 · 关键 token</h3>
+      <table class="tbl">
+        <thead><tr><th>用途</th><th>token</th><th class="r">值 / 对比度</th></tr></thead>
+        <tbody id="spec-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>42 个 alias token × 浅色 / 深色 · 一套映射</span>
+    <span>结构示意 · 颜色为真实 token · 装配为 dsh-palettes</span>
+  </footer>
+</div>
+
+<script>
+const P = __PALETTES_JSON__;
+const ORDER = Object.keys(P).sort((a, b) => P[a].order - P[b].order);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+let current = ORDER[0];
+let mode = 'light';
+
+const colorsOf = (p) => (mode === 'dark' ? p.dark : p);
+const tokensOf = (p) => (mode === 'dark' ? p.darkTokens : p.tokens);
+const ratiosOf = (p) => (mode === 'dark' ? p.darkRatios : p.ratios);
+
+function fmtCheck(ratio) { return ratio.toFixed(1) + ':1'; }
+
+function renderSpec() {
+  const p = P[current], c = colorsOf(p), t = tokensOf(p), r = ratiosOf(p);
+  const rows = [
+    ['画布', '--dsw-alias-bg-base', c.base, ''],
+    ['侧栏', '--dsw-specific-sidebar-fill', c.sidebar, ''],
+    ['用户气泡', '--dsw-specific-bubble', c.bubble, ''],
+    ['强调 / 链接', '--dsw-alias-state-business-primary', c.accent, ''],
+    ['正文', '--dsw-alias-label-primary', c.ink, fmtCheck(r.ink)],
+    ['次要文字', '--dsw-alias-label-secondary', t['--dsw-alias-label-secondary'], fmtCheck(r.sec)],
+    ['说明文字', '--dsw-alias-label-caption', t['--dsw-alias-label-caption'], fmtCheck(r.cap)],
+    ['代码块', '--dsw-alias-markdown-code-block', c.code, ''],
+  ];
+  document.getElementById('spec-rows').innerHTML = rows.map(([label, token, value, ratio]) => {
+    const swatch = /^#[0-9a-f]{6}$/i.test(value) ? '<span class="swv" style="background:' + value + '"></span>' : '';
+    return '<tr><td>' + label + '</td><td>' + token + '</td><td class="r">' + (ratio || swatch + value) + '</td></tr>';
+  }).join('');
+}
+
+function renderCaption() {
+  const p = P[current], c = colorsOf(p);
+  document.getElementById('cap-name').textContent = p.name;
+  document.getElementById('cap-en').textContent = p.en;
+  document.getElementById('cap-idea').textContent = p.idea;
+  [['base', c.base], ['side', c.sidebar], ['bubble', c.bubble], ['accent', c.accent]].forEach(([k, v]) => {
+    document.getElementById('v-' + k).style.background = v;
+    document.getElementById('h-' + k).textContent = v.toUpperCase();
+  });
+}
+
+function renderCode() {
+  const t = tokensOf(P[current]);
+  $$('[data-token]').forEach((el) => { el.textContent = t[el.dataset.token]; });
+  document.getElementById('code-sel').textContent = '[data-scheme="' + current + '"]';
+}
+
+function renderAll() { renderCaption(); renderCode(); renderSpec(); }
+
+function pushHash() {
+  try {
+    history.replaceState(null, '', '#' + current + (mode === 'dark' ? ':dark' : ''));
+  } catch (e) { /* file:// 下不允许改 history */ }
+}
+
+function setScheme(id, push) {
+  if (!P[id]) return;
+  current = id;
+  $$('.live').forEach((el) => { el.dataset.scheme = id; });
+  $$('[data-pick]').forEach((el) => { el.setAttribute('aria-pressed', String(el.dataset.pick === id)); });
+  renderAll();
+  if (push) pushHash();
+}
+
+function setMode(next, push) {
+  mode = next === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.mode = mode;
+  $$('.live').forEach((el) => { el.dataset.mode = mode; });
+  $$('.mini').forEach((el) => { el.dataset.mode = mode; });
+  $$('[data-mode-pick]').forEach((el) => { el.setAttribute('aria-pressed', String(el.dataset.modePick === mode)); });
+  $$('[data-appearance]').forEach((el) => { el.setAttribute('aria-pressed', String(el.dataset.appearance === mode)); });
+  document.getElementById('cap-mode').textContent = mode === 'dark' ? '深色' : '浅色';
+  renderAll();
+  if (push) pushHash();
+}
+
+document.addEventListener('click', (e) => {
+  const modeBtn = e.target.closest('[data-mode-pick]');
+  if (modeBtn) { setMode(modeBtn.dataset.modePick, true); return; }
+  const appearance = e.target.closest('[data-appearance]');
+  if (appearance && appearance.dataset.appearance !== 'system') { setMode(appearance.dataset.appearance, true); return; }
+  const btn = e.target.closest('[data-pick]');
+  if (!btn) return;
+  setScheme(btn.dataset.pick, true);
+  btn.focus({ preventScroll: true });
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || e.target.matches('input,textarea')) return;
+  if (e.key === 'd' || e.key === 'D') { setMode(mode === 'dark' ? 'light' : 'dark', true); return; }
+  const i = Number(e.key);
+  if (i >= 1 && i <= ORDER.length) setScheme(ORDER[i - 1], true);
+});
+
+const fromHash = location.hash.slice(1);
+const [hashScheme, hashMode] = fromHash.split(':');
+setMode(hashMode === 'dark' ? 'dark' : 'light', false);
+setScheme(P[hashScheme] ? hashScheme : ORDER[0], false);
+</script>
+</body>
+</html>
