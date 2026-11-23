@@ -16,6 +16,15 @@ DSH 的「发现」页和 `dshmarket` 都读同一份社区精选目录：GitHub
 3. 提 PR，标题例如 `Add Flinn-X/dsh-plugins: palettes, fold-user-messages`。一个 PR 最多 3 条，两份正好可以一起提。
 4. CI 会检查：条目数量、目标仓库的 `package.json` 是否声明 `dsh.bundle`（本仓库两个子包都声明了）、仓库创建是否满 1 天、README 能否由数据重新生成。合并后站点与市场通常一天内出现。
 
+也可以用脚本做完 1–3（需要 `gh auth login`）：
+
+```powershell
+# 先干跑，检查 clone 下来的目录内容
+pwsh -File market/submit.ps1 -DryRun
+# 确认无误后真正提 PR
+pwsh -File market/submit.ps1
+```
+
 ## 硬性门槛（已满足 / 需注意）
 
 - [x] 子包 `package.json` 声明 `dsh.bundle.patch`，并带 `cordis.patch.yml`。
